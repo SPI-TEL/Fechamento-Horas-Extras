@@ -3,23 +3,35 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Portal Fechamento Horas Extras - Vivo SPI</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Portal Fechamento Horas Extras | Vivo SPI</title>
+  
+  <!-- CSS Tailwind básico -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js oficial -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- PapaParse para ler o CSV -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
   <style>
     body { font-family: system-ui, -apple-system, sans-serif; }
     @media print {
-      header, button, input, select, #login-screen { display: none !important; }
+      header, #btn-export-pdf, button, input, select, #login-screen { display: none !important; }
       body { background-color: #ffffff !important; color: #000000 !important; }
       #main-portal { display: block !important; }
+      .shadow-sm, .shadow-md, .shadow-lg, .shadow-2xl { box-shadow: none !important; }
+      .border { border-color: #e2e8f0 !important; }
     }
   </style>
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col antialiased">
 
+  <!-- ================= TELA DE LOGIN ================= -->
   <div id="login-screen" class="fixed inset-0 bg-[#0b2341] z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl space-y-6 relative border border-slate-200">
+    <div class="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl space-y-6 relative overflow-hidden border border-slate-200">
+      
       <div class="text-center space-y-2">
         <div class="w-16 h-16 bg-sky-500 text-white rounded-2xl flex items-center justify-center mx-auto shadow-md font-bold text-2xl">
           🛡️
@@ -31,26 +43,37 @@
       <form onsubmit="handleLogin(event)" class="space-y-4">
         <div>
           <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Usuário</label>
-          <input type="text" id="login-user" required placeholder="Digite seu usuário..." value="admin" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-800 focus:ring-2 focus:ring-sky-500 focus:outline-none">
+          <input type="text" id="login-user" required placeholder="Digite seu usuário..." value="admin" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-800 font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none">
         </div>
 
         <div>
           <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Senha</label>
-          <input type="password" id="login-pass" required placeholder="Digite sua senha..." value="admin123" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-800 focus:ring-2 focus:ring-sky-500 focus:outline-none">
+          <input type="password" id="login-pass" required placeholder="Digite sua senha..." value="admin123" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-800 font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none">
         </div>
 
-        <button type="submit" class="w-full py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs rounded-lg shadow-md transition">
-          Entrar no Portal ➔
+        <div id="login-alert" class="hidden text-xs bg-rose-50 text-rose-700 border border-rose-200 p-2.5 rounded-lg text-center font-medium">
+          ⚠️ Usuário ou senha incorretos!
+        </div>
+
+        <button type="submit" id="btn-login" class="w-full py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs rounded-lg shadow-md transition flex items-center justify-center gap-2">
+          <span>Entrar no Portal</span> ➔
         </button>
       </form>
+
+      <div class="pt-4 border-t border-slate-100 text-center text-[10px] text-slate-400">
+        Acesso restrito à supervisão e coordenação SPI • Validação ao vivo
+      </div>
     </div>
   </div>
 
+  <!-- ================= PORTAL PRINCIPAL ================= -->
   <div id="main-portal" class="hidden min-h-screen flex-col">
+    
+    <!-- Topbar Header -->
     <header class="bg-[#0b2341] text-white shadow-lg sticky top-0 z-40">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 bg-sky-500 rounded-xl flex items-center justify-center text-white font-bold">
+          <div class="w-10 h-10 bg-sky-500 rounded-xl flex items-center justify-center text-white shadow-inner font-bold">
             ⏰
           </div>
           <div>
@@ -60,111 +83,267 @@
         </div>
 
         <div class="flex items-center gap-3">
-          <button onclick="window.print()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-lg shadow transition">
+          <button id="btn-export-pdf" onclick="window.print()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-lg shadow transition flex items-center gap-2">
             📄 Exportar PDF
           </button>
-          <button onclick="loadGoogleSheetData()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-semibold rounded-lg border border-slate-600 transition">
-            🔄 Sincronizar Planilha
+
+          <button onclick="loadGoogleSheetData()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-semibold rounded-lg border border-slate-600 transition flex items-center gap-2">
+            🔄 <span>Sincronizar Planilha</span>
           </button>
-          <button onclick="handleLogout()" class="text-slate-300 hover:text-rose-400 p-2 text-sm transition">
+
+          <div class="h-6 w-px bg-slate-700"></div>
+
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-full bg-sky-600 flex items-center justify-center font-bold text-xs">
+              SPI
+            </div>
+            <div class="hidden sm:block text-left text-xs">
+              <p class="font-bold leading-tight">Supervisão SPI</p>
+              <p class="text-[10px] text-slate-300">Sessão Ativa</p>
+            </div>
+          </div>
+
+          <button onclick="handleLogout()" title="Sair do Portal" class="text-slate-300 hover:text-rose-400 p-2 text-sm transition">
             🚪
           </button>
         </div>
       </div>
     </header>
 
-    <div class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    <!-- Área Principal de Conteúdo -->
+    <div id="printable-dashboard" class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+      <!-- BARRA DE FILTROS COMPLETA (ANO, MÊS, DDD, ÁREA) -->
       <section class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-4">
         <div class="flex items-center gap-2 text-xs font-semibold text-slate-600">
           🔍 <span>Filtros do Painel:</span>
         </div>
+
         <div class="flex flex-wrap items-center gap-3">
-          <select id="filter-ano" onchange="applyFilters()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 font-medium"><option value="ALL">Todos os Anos</option></select>
-          <select id="filter-mes" onchange="applyFilters()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 font-medium"><option value="ALL">Todos os Meses</option></select>
-          <select id="filter-ddd" onchange="applyFilters()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 font-medium"><option value="ALL">Todos os DDDs</option></select>
-          <select id="filter-area" onchange="applyFilters()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 font-medium"><option value="ALL">Todas as Áreas</option></select>
-          <button onclick="resetFilters()" class="text-xs text-slate-500 hover:text-sky-600 font-semibold underline px-2">Limpar Filtros</button>
+          <select id="filter-ano" onchange="applyFilters()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none">
+            <option value="ALL">Todos os Anos</option>
+          </select>
+
+          <select id="filter-mes" onchange="applyFilters()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none">
+            <option value="ALL">Todos os Meses</option>
+          </select>
+
+          <select id="filter-ddd" onchange="applyFilters()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none">
+            <option value="ALL">Todos os DDDs</option>
+          </select>
+
+          <select id="filter-area" onchange="applyFilters()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none">
+            <option value="ALL">Todas as Áreas</option>
+          </select>
+
+          <button onclick="resetFilters()" class="text-xs text-slate-500 hover:text-sky-600 font-semibold underline px-2">
+            Limpar Filtros
+          </button>
         </div>
       </section>
 
+      <!-- Cards de KPIs Principais -->
       <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
-          <span class="text-slate-500 text-xs font-semibold">CUSTO TOTAL</span>
+          <div class="flex items-center justify-between text-slate-500 text-xs font-semibold">
+            <span>CUSTO TOTAL</span> 💰
+          </div>
           <p id="kpi-custo-total" class="text-lg font-extrabold text-slate-900">R$ 0,00</p>
+          <p class="text-[11px] text-slate-500 font-medium">Acumulado do Período</p>
         </div>
+
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
-          <span class="text-slate-500 text-xs font-semibold">MÉDIA MENSAL</span>
+          <div class="flex items-center justify-between text-slate-500 text-xs font-semibold">
+            <span>MÉDIA MENSAL</span> 📈
+          </div>
           <p id="kpi-media-mensal" class="text-lg font-extrabold text-slate-900">R$ 0,00</p>
+          <p class="text-[11px] text-slate-500 font-medium">Custo Médio por Mês</p>
         </div>
+
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
-          <span class="text-slate-500 text-xs font-semibold">MÊS DE PICO</span>
+          <div class="flex items-center justify-between text-slate-500 text-xs font-semibold">
+            <span>MÊS DE PICO</span> 🚨
+          </div>
           <p id="kpi-mes-pico" class="text-lg font-extrabold text-rose-600">--</p>
+          <p id="kpi-pico-valor" class="text-[11px] text-slate-500 font-medium">R$ 0,00</p>
         </div>
+
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
-          <span class="text-slate-500 text-xs font-semibold">COMP. ÚLTIMO MÊS</span>
+          <div class="flex items-center justify-between text-slate-500 text-xs font-semibold">
+            <span>COMP. ÚLTIMO MÊS</span> 🔄
+          </div>
           <p id="kpi-comp-valor" class="text-lg font-extrabold text-slate-900">R$ 0,00</p>
           <p id="kpi-comp-sub" class="text-[11px] font-semibold text-slate-500">Vs. Mês Anterior</p>
         </div>
+
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
-          <span class="text-slate-500 text-xs font-semibold">CUSTO / HC / MÊS</span>
+          <div class="flex items-center justify-between text-slate-500 text-xs font-semibold">
+            <span>CUSTO / HC / MÊS</span> ⚙️
+          </div>
           <p id="kpi-hc-custo" class="text-lg font-extrabold text-slate-900">R$ 0,00</p>
+          <p class="text-[11px] text-slate-500 font-medium">Eficiência p/ Colaborador</p>
         </div>
+
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
-          <span class="text-slate-500 text-xs font-semibold">HEADCOUNT ATUAL</span>
+          <div class="flex items-center justify-between text-slate-500 text-xs font-semibold">
+            <span>HEADCOUNT ATUAL</span> 👥
+          </div>
           <p id="kpi-hc-total" class="text-lg font-extrabold text-slate-900">0 HC</p>
+          <p id="kpi-hc-sub" class="text-[11px] text-slate-500 font-medium">Último Fechamento</p>
         </div>
+
       </section>
 
+      <!-- Linha 1: Evolução Temporal + Mês Atual por Área -->
       <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="lg:col-span-2 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <h2 class="text-sm font-bold text-slate-900 mb-3">Evolução do Custo Mensal (R$)</h2>
-          <div class="relative h-72"><canvas id="chartEvolucaoMensal"></canvas></div>
+        <div class="lg:col-span-2 bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+          <div class="flex items-center justify-between border-b pb-3">
+            <div>
+              <h2 class="text-sm font-bold text-slate-900">Evolução do Custo Mensal (R$)</h2>
+              <p class="text-xs text-slate-500">Histórico de custos mensais acumulados da operação</p>
+            </div>
+            <span class="px-2.5 py-1 bg-sky-50 text-sky-700 text-[10px] font-bold rounded-full uppercase border border-sky-200">Histórico Completo</span>
+          </div>
+          <div class="relative h-72">
+            <canvas id="chartEvolucaoMensal"></canvas>
+          </div>
         </div>
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <h2 class="text-sm font-bold text-slate-900 mb-3">Mês Atual por Área</h2>
-          <div class="relative h-72"><canvas id="chartMesAtualArea"></canvas></div>
+
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+          <div class="flex items-center justify-between border-b pb-3">
+            <div>
+              <h2 class="text-sm font-bold text-slate-900">Mês Atual por Área</h2>
+              <p class="text-xs text-slate-500">Ranking do último mês com área ofensora no topo</p>
+            </div>
+            <span class="px-2.5 py-1 bg-rose-50 text-rose-700 text-[10px] font-bold rounded-full uppercase border border-rose-200">Último Fechamento</span>
+          </div>
+          <div class="relative h-72">
+            <canvas id="chartMesAtualArea"></canvas>
+          </div>
         </div>
       </section>
 
+      <!-- Linha 2: Distribuição por Modalidade + Top 3 por Modalidade -->
       <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <h2 class="text-sm font-bold text-slate-900 mb-3">Distribuição por Modalidade (%)</h2>
-          <div class="relative h-72"><canvas id="chartModalidade"></canvas></div>
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+          <div class="flex items-center justify-between border-b pb-3">
+            <div>
+              <h2 class="text-sm font-bold text-slate-900">Distribuição por Modalidade (%)</h2>
+              <p class="text-xs text-slate-500">Proporção total de 50%, 100%, Sobreaviso e Ad. Noturno</p>
+            </div>
+            📊
+          </div>
+          <div class="relative h-72 flex items-center justify-center">
+            <canvas id="chartModalidade"></canvas>
+          </div>
         </div>
-        <div class="lg:col-span-2 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <h2 class="text-sm font-bold text-slate-900 mb-3">Top 3 Ofensores por Modalidade de Hora</h2>
-          <div class="relative h-72"><canvas id="chartTop3Modalidades"></canvas></div>
+
+        <div class="lg:col-span-2 bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+          <div class="flex items-center justify-between border-b pb-3">
+            <div>
+              <h2 class="text-sm font-bold text-slate-900">Top 3 Ofensores por Modalidade de Hora</h2>
+              <p class="text-xs text-slate-500">As 3 principais áreas geradoras de custo para cada tipo de hora</p>
+            </div>
+            <span class="px-2.5 py-1 bg-rose-50 text-rose-700 text-[10px] font-bold rounded-full uppercase border border-rose-200">Top 3 por Modalidade</span>
+          </div>
+          <div class="relative h-72">
+            <canvas id="chartTop3Modalidades"></canvas>
+          </div>
         </div>
       </section>
 
+      <!-- Linha 3: Áreas Ofensoras + Custo Médio por HC + Evolução Headcount -->
+      <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+          <div class="flex items-center justify-between border-b pb-3">
+            <div>
+              <h2 class="text-sm font-bold text-slate-900">Áreas Ofensoras (Geral)</h2>
+              <p class="text-xs text-slate-500">Ranking do volume financeiro total</p>
+            </div>
+            <span class="px-2.5 py-1 bg-rose-50 text-rose-700 text-[10px] font-bold rounded-full uppercase border border-rose-200">Ranking Geral</span>
+          </div>
+          <div class="relative h-72">
+            <canvas id="chartAreasOfensoras"></canvas>
+          </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+          <div class="flex items-center justify-between border-b pb-3">
+            <div>
+              <h2 class="text-sm font-bold text-slate-900">Custo Médio / HC (R$)</h2>
+              <p class="text-xs text-slate-500">Eficiência R$/HC/Mês por área</p>
+            </div>
+            <span class="px-2.5 py-1 bg-purple-50 text-purple-700 text-[10px] font-bold rounded-full uppercase border border-purple-200">R$/HC/Mês</span>
+          </div>
+          <div class="relative h-72">
+            <canvas id="chartHCEficiencia"></canvas>
+          </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+          <div class="flex items-center justify-between border-b pb-3">
+            <div>
+              <h2 class="text-sm font-bold text-slate-900">Evolução de Headcount</h2>
+              <p class="text-xs text-slate-500">Total de colaboradores ativos</p>
+            </div>
+            <span class="px-2.5 py-1 bg-amber-50 text-amber-700 text-[10px] font-bold rounded-full uppercase border border-amber-200">Evolução HC</span>
+          </div>
+          <div class="relative h-72">
+            <canvas id="chartEvolucaoHC"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tabela de Dados Detalhada -->
       <section class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div class="p-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
-          <h3 class="text-sm font-bold text-slate-900">Detalhamento dos Registros</h3>
-          <input type="text" id="table-search" oninput="renderTable()" placeholder="Buscar área, DDD, mês..." class="text-xs bg-white border border-slate-300 rounded-lg px-3 py-1.5 w-64">
+        <div class="p-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-4 bg-slate-50">
+          <div>
+            <h3 class="text-sm font-bold text-slate-900">Detalhamento por Área e Período</h3>
+            <p class="text-xs text-slate-500">Registros consolidados sincronizados do Google Sheets</p>
+          </div>
+          <input type="text" id="table-search" oninput="renderTable()" placeholder="Buscar área, DDD, mês..." class="text-xs bg-white border border-slate-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-sky-500 focus:outline-none w-64">
         </div>
+
         <div class="overflow-x-auto max-h-80">
           <table class="w-full text-left text-xs border-collapse">
-            <thead class="bg-slate-100 uppercase text-[10px] border-b">
+            <thead class="bg-slate-100 text-slate-700 uppercase tracking-wider text-[10px] sticky top-0 border-b border-slate-200">
               <tr>
-                <th class="p-3">Mês/Ano</th><th class="p-3">Período</th><th class="p-3">Área / DDD</th>
-                <th class="p-3 text-center">HC</th><th class="p-3 text-right">Horas 50%</th>
-                <th class="p-3 text-right">Horas 100%</th><th class="p-3 text-right">Sobreaviso</th>
-                <th class="p-3 text-right">Ad. Noturno</th><th class="p-3 text-right">Valor Total</th>
+                <th class="p-3 font-bold">Mês/Ano</th>
+                <th class="p-3 font-bold">Período Fechamento</th>
+                <th class="p-3 font-bold">Área / DDD</th>
+                <th class="p-3 font-bold text-center">HC</th>
+                <th class="p-3 font-bold text-right">Horas 50%</th>
+                <th class="p-3 font-bold text-right">Horas 100%</th>
+                <th class="p-3 font-bold text-right">Sobreaviso</th>
+                <th class="p-3 font-bold text-right">Ad. Noturno</th>
+                <th class="p-3 font-bold text-right">Valor Total</th>
               </tr>
             </thead>
-            <tbody id="table-body" class="divide-y divide-slate-100"></tbody>
+            <tbody id="table-body" class="divide-y divide-slate-100 text-slate-700">
+            </tbody>
           </table>
         </div>
       </section>
+
     </div>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 text-[11px] py-4 text-center border-t border-slate-800">
+      <p>CONTRATO VIVO - SPI • Painel Gerencial de Horas Extras • Dados integrados via Google Sheets</p>
+    </footer>
+
   </div>
 
   <script>
     const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQZQ1H_MHtywA4MhrFlGkuLCL0lNQmwwjVDObrj2iryoxNlLdat0pwQFJyDDY6WImYbLDwauF_41E_k/pub?gid=135833026&single=true&output=csv';
-    let rawData = [], filteredData = [], chartInstances = {};
 
-    function handleLogin(e) {
-      e.preventDefault();
+    let rawData = [];
+    let filteredData = [];
+    let chartInstances = {};
+
+    function handleLogin(event) {
+      event.preventDefault();
       document.getElementById('login-screen').classList.add('hidden');
       document.getElementById('main-portal').classList.remove('hidden');
       document.getElementById('main-portal').classList.add('flex');
@@ -173,47 +352,75 @@
 
     function handleLogout() {
       document.getElementById('main-portal').classList.add('hidden');
+      document.getElementById('main-portal').classList.remove('flex');
       document.getElementById('login-screen').classList.remove('hidden');
     }
 
-    function timeToHours(str) {
-      if (!str) return 0;
-      let p = str.toString().trim().split(':');
-      if (p.length < 2) return parseFloat(str) || 0;
-      return (parseInt(p[0],10)||0) + ((parseInt(p[1],10)||0)/60);
+    function timeToHours(timeStr) {
+      if (!timeStr) return 0;
+      let parts = timeStr.toString().trim().split(':');
+      if (parts.length < 2) return parseFloat(timeStr) || 0;
+      let h = parseInt(parts[0], 10) || 0;
+      let m = parseInt(parts[1], 10) || 0;
+      let s = parts[2] ? parseInt(parts[2], 10) || 0 : 0;
+      return h + (m / 60) + (s / 3600);
     }
 
     function parseCurrency(val) {
       if (!val) return 0;
+      if (typeof val === 'number') return val;
       let clean = val.toString().replace('R$', '').replace(/\./g, '').replace(',', '.').trim();
       return parseFloat(clean) || 0;
     }
 
+    function extractDDD(areaStr) {
+      if (!areaStr) return 'Outros';
+      let match = areaStr.toString().match(/\d+/);
+      return match ? match[0] : 'Outros';
+    }
+
     function loadGoogleSheetData() {
       Papa.parse(GOOGLE_SHEET_CSV_URL, {
-        download: true, header: true, skipEmptyLines: true,
-        complete: function(res) { if (res.data) processParsedData(res.data); }
+        download: true,
+        header: true,
+        skipEmptyLines: true,
+        complete: function(results) {
+          if (results.data && results.data.length > 0) {
+            processParsedData(results.data);
+          }
+        }
       });
     }
 
     function processParsedData(data) {
       rawData = data.map((row, idx) => {
-        const ano = row['ANO'] || '2024';
-        const mes = row['MÊS'] || 'jan';
-        const area = (row['ÁREAS'] || '').toString().trim();
+        const ano = row['ANO'] || row['Ano'] || '2024';
+        const mes = row['MÊS'] || row['Mês'] || row['Mes'] || 'jan';
+        const periodo = row['PERÍODO FECHAMENTO'] || row['PERIODO FECHAMENTO'] || '';
+        const area = (row['ÁREAS'] || row['AREAS'] || row['Área'] || '').toString().trim();
         const hc = parseInt(row['HC '] || row['HC'] || 0, 10);
-        const matchDDD = area.match(/\d+/);
-        const ddd = matchDDD ? matchDDD[0] : 'Outros';
+
+        const h50 = timeToHours(row['HORAS 50% '] || row['HORAS 50%']);
+        const h100 = timeToHours(row['HORAS 100%'] || row['HORAS 100% ']);
+        const sob = timeToHours(row['SOBREAVISO'] || row['SOBREAVISO ']);
+        const not = timeToHours(row['AD.NOTURNO'] || row['AD.NOTURNO ']);
+        const valor = parseCurrency(row['VALOR TOTAL $'] || row['VALOR TOTAL']);
+        const ddd = extractDDD(area);
 
         return {
-          id: idx, ano: ano.toString().trim(), mes: mes.toString().trim().toLowerCase(),
+          id: idx,
+          ano: ano.toString().trim(),
+          mes: mes.toString().trim().toLowerCase(),
           mesAno: `${mes.toString().trim().toLowerCase()}/${ano.toString().trim()}`,
-          periodo: row['PERÍODO FECHAMENTO'] || '', area: area, ddd: ddd, hc: hc,
-          h50: timeToHours(row['HORAS 50% '] || row['HORAS 50%']),
-          h100: timeToHours(row['HORAS 100%'] || row['HORAS 100% ']),
-          sob: timeToHours(row['SOBREAVISO'] || row['SOBREAVISO ']),
-          not: timeToHours(row['AD.NOTURNO'] || row['AD.NOTURNO ']),
-          valor: parseCurrency(row['VALOR TOTAL $'] || row['VALOR TOTAL'])
+          periodo: periodo,
+          area: area,
+          ddd: ddd,
+          hc: hc,
+          h50: h50,
+          h100: h100,
+          sob: sob,
+          not: not,
+          valor: valor
         };
       }).filter(item => item.area !== '' && item.area.toUpperCase() !== 'TOTAL');
 
@@ -222,32 +429,37 @@
     }
 
     function populateSelectOptions() {
-      const anos = [...new Set(rawData.map(d => d.ano))].sort((a,b)=>b-a);
-      document.getElementById('filter-ano').innerHTML = '<option value="ALL">Todos os Anos</option>' + anos.map(a=>`<option value="${a}">Ano ${a}</option>`).join('');
-      
-      const ordem = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
-      const meses = [...new Set(rawData.map(d => d.mes))].sort((a,b)=>ordem.indexOf(a)-ordem.indexOf(b));
-      document.getElementById('filter-mes').innerHTML = '<option value="ALL">Todos os Meses</option>' + meses.map(m=>`<option value="${m}">${m.toUpperCase()}</option>`).join('');
+      const anoSelect = document.getElementById('filter-ano');
+      const anos = [...new Set(rawData.map(d => d.ano))].sort((a,b) => b - a);
+      anoSelect.innerHTML = '<option value="ALL" selected>Todos os Anos</option>' + anos.map(a => `<option value="${a}">Ano ${a}</option>`).join('');
 
-      const ddds = [...new Set(rawData.map(d => d.ddd))].sort((a,b)=>a-b);
-      document.getElementById('filter-ddd').innerHTML = '<option value="ALL">Todos os DDDs</option>' + ddds.map(d=>`<option value="${d}">DDD ${d}</option>`).join('');
+      const mesSelect = document.getElementById('filter-mes');
+      const ordemMeses = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+      const mesesPresentes = [...new Set(rawData.map(d => d.mes))].sort((a,b) => ordemMeses.indexOf(a) - ordemMeses.indexOf(b));
+      mesSelect.innerHTML = '<option value="ALL" selected>Todos os Meses</option>' + mesesPresentes.map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('');
 
+      const dddSelect = document.getElementById('filter-ddd');
+      const ddds = [...new Set(rawData.map(d => d.ddd))].sort((a,b) => a - b);
+      dddSelect.innerHTML = '<option value="ALL" selected>Todos os DDDs</option>' + ddds.map(d => `<option value="${d}">DDD ${d}</option>`).join('');
+
+      const areaSelect = document.getElementById('filter-area');
       const areas = [...new Set(rawData.map(d => d.area))].sort();
-      document.getElementById('filter-area').innerHTML = '<option value="ALL">Todas as Áreas</option>' + areas.map(a=>`<option value="${a}">Área ${a}</option>`).join('');
+      areaSelect.innerHTML = '<option value="ALL" selected>Todas as Áreas</option>' + areas.map(a => `<option value="${a}">Área ${a}</option>`).join('');
     }
 
     function applyFilters() {
-      const sAno = document.getElementById('filter-ano').value;
-      const sMes = document.getElementById('filter-mes').value;
-      const sDDD = document.getElementById('filter-ddd').value;
-      const sArea = document.getElementById('filter-area').value;
+      const selectedAno = document.getElementById('filter-ano').value;
+      const selectedMes = document.getElementById('filter-mes').value;
+      const selectedDDD = document.getElementById('filter-ddd').value;
+      const selectedArea = document.getElementById('filter-area').value;
 
-      filteredData = rawData.filter(d => 
-        (sAno === 'ALL' || d.ano === sAno) &&
-        (sMes === 'ALL' || d.mes === sMes) &&
-        (sDDD === 'ALL' || d.ddd === sDDD) &&
-        (sArea === 'ALL' || d.area === sArea)
-      );
+      filteredData = rawData.filter(item => {
+        const matchAno = (selectedAno === 'ALL' || item.ano === selectedAno);
+        const matchMes = (selectedMes === 'ALL' || item.mes === selectedMes);
+        const matchDDD = (selectedDDD === 'ALL' || item.ddd === selectedDDD);
+        const matchArea = (selectedArea === 'ALL' || item.area === selectedArea);
+        return matchAno && matchMes && matchDDD && matchArea;
+      });
 
       renderKPIs();
       renderCharts();
@@ -262,83 +474,270 @@
       applyFilters();
     }
 
-    function fmtR$(v) { return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
+    function fmtR$(val) {
+      return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
 
     function renderKPIs() {
-      const total = filteredData.reduce((a, b) => a + b.valor, 0);
-      const ordem = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
-      let listaMeses = [...new Set(filteredData.map(d => d.mesAno))].sort((a,b)=>{
-        let [mA,aA]=a.split('/'), [mB,aB]=b.split('/');
-        return aA!==aB ? aA-aB : ordem.indexOf(mA)-ordem.indexOf(mB);
+      const totalCusto = filteredData.reduce((acc, d) => acc + d.valor, 0);
+      const ordemMeses = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+
+      let listaMesesAno = [...new Set(filteredData.map(d => d.mesAno))].sort((a,b) => {
+        let [mA, aA] = a.split('/');
+        let [mB, aB] = b.split('/');
+        if (aA !== aB) return parseInt(aA) - parseInt(aB);
+        return ordemMeses.indexOf(mA) - ordemMeses.indexOf(mB);
       });
 
-      document.getElementById('kpi-custo-total').innerText = fmtR$(total);
-      document.getElementById('kpi-media-mensal').innerText = fmtR$(total / (listaMeses.length || 1));
-      
-      let custoPorMes = {};
-      filteredData.forEach(d => custoPorMes[d.mesAno] = (custoPorMes[d.mesAno] || 0) + d.valor);
-      let picoM = '--', picoV = 0;
-      Object.keys(custoPorMes).forEach(m => { if(custoPorMes[m] > picoV){ picoV = custoPorMes[m]; picoM = m; } });
-      document.getElementById('kpi-mes-pico').innerText = picoM;
+      const numMeses = listaMesesAno.length || 1;
+      const mediaMensal = totalCusto / numMeses;
 
-      let uMes = listaMeses[listaMeses.length-1] || 'jan/2024';
-      let dUltimo = filteredData.filter(d => d.mesAno === uMes);
-      document.getElementById('kpi-hc-total').innerText = `${dUltimo.reduce((a,b)=>a+b.hc,0)} HC`;
+      let custoPorMes = {};
+      filteredData.forEach(d => {
+        custoPorMes[d.mesAno] = (custoPorMes[d.mesAno] || 0) + d.valor;
+      });
+
+      let picoMes = '--';
+      let picoValor = 0;
+      Object.keys(custoPorMes).forEach(m => {
+        if (custoPorMes[m] > picoValor) {
+          picoValor = custoPorMes[m];
+          picoMes = m;
+        }
+      });
+
+      let compValorElem = document.getElementById('kpi-comp-valor');
+      let compSubElem = document.getElementById('kpi-comp-sub');
+
+      if (listaMesesAno.length >= 2) {
+        let ultimoMes = listaMesesAno[listaMesesAno.length - 1];
+        let penultimoMes = listaMesesAno[listaMesesAno.length - 2];
+
+        let valorUltimo = custoPorMes[ultimoMes] || 0;
+        let valorPenultimo = custoPorMes[penultimoMes] || 0;
+
+        let diff = valorUltimo - valorPenultimo;
+        let pct = valorPenultimo > 0 ? ((diff / valorPenultimo) * 100) : 0;
+
+        let diffFmt = fmtR$(Math.abs(diff));
+        let pctFmt = Math.abs(pct).toFixed(1) + '%';
+
+        if (diff > 0) {
+          compValorElem.innerText = `+${pctFmt}`;
+          compValorElem.className = "text-lg font-extrabold text-rose-600";
+          compSubElem.innerHTML = `<span class="text-rose-600 font-bold">▲ +${diffFmt}</span> vs. ${penultimoMes}`;
+        } else if (diff < 0) {
+          compValorElem.innerText = `-${pctFmt}`;
+          compValorElem.className = "text-lg font-extrabold text-emerald-600";
+          compSubElem.innerHTML = `<span class="text-emerald-600 font-bold">▼ -${diffFmt}</span> vs. ${penultimoMes}`;
+        } else {
+          compValorElem.innerText = `0.0%`;
+          compValorElem.className = "text-lg font-extrabold text-slate-700";
+          compSubElem.innerText = `Estável vs. ${penultimoMes}`;
+        }
+      } else {
+        compValorElem.innerText = `--`;
+        compValorElem.className = "text-lg font-extrabold text-slate-400";
+        compSubElem.innerText = `Período Insuficiente`;
+      }
+
+      let ultimoMesAno = listaMesesAno[listaMesesAno.length - 1] || 'jan/2024';
+      let dadosUltimoMes = filteredData.filter(d => d.mesAno === ultimoMesAno);
+      let hcAtualTotal = dadosUltimoMes.reduce((acc, curr) => acc + curr.hc, 0);
+
+      let hcMedioGeral = Math.round(filteredData.reduce((a, b) => a + b.hc, 0) / (filteredData.length || 1));
+      let hcCustoMedio = totalCusto / (numMeses * (hcMedioGeral || 1));
+
+      document.getElementById('kpi-custo-total').innerText = fmtR$(totalCusto);
+      document.getElementById('kpi-media-mensal').innerText = fmtR$(mediaMensal);
+      document.getElementById('kpi-mes-pico').innerText = picoMes;
+      document.getElementById('kpi-pico-valor').innerText = `Pico: ${fmtR$(picoValor)}`;
+      document.getElementById('kpi-hc-custo').innerText = fmtR$(hcCustoMedio);
+      document.getElementById('kpi-hc-total').innerText = `${hcAtualTotal} HC`;
+      document.getElementById('kpi-hc-sub').innerText = `Mês: ${ultimoMesAno}`;
     }
 
     function renderCharts() {
-      Object.keys(chartInstances).forEach(k => { if(chartInstances[k]) chartInstances[k].destroy(); });
-      const ordem = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+      Object.keys(chartInstances).forEach(k => { if (chartInstances[k]) chartInstances[k].destroy(); });
+
+      const ordemMeses = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
 
       let mesMap = {};
-      filteredData.forEach(d => mesMap[d.mesAno] = (mesMap[d.mesAno] || 0) + d.valor);
-      let labels = Object.keys(mesMap).sort((a,b)=>{
-        let [mA,aA]=a.split('/'), [mB,aB]=b.split('/');
-        return aA!==aB ? aA-aB : ordem.indexOf(mA)-ordem.indexOf(mB);
+      filteredData.forEach(d => {
+        let key = `${d.mes}/${d.ano}`;
+        mesMap[key] = (mesMap[key] || 0) + d.valor;
       });
 
-      chartInstances.evol = new Chart(document.getElementById('chartEvolucaoMensal'), {
+      let labelsEvol = Object.keys(mesMap).sort((a,b) => {
+        let [mA, aA] = a.split('/');
+        let [mB, aB] = b.split('/');
+        if (aA !== aB) return parseInt(aA) - parseInt(aB);
+        return ordemMeses.indexOf(mA) - ordemMeses.indexOf(mB);
+      });
+
+      const ctxEvol = document.getElementById('chartEvolucaoMensal').getContext('2d');
+      chartInstances.evolucao = new Chart(ctxEvol, {
         type: 'line',
-        data: { labels: labels, datasets: [{ label: 'Custo', data: labels.map(l=>mesMap[l]), borderColor: '#00a9e0', fill: false }] },
-        options: { responsive: true, maintainAspectRatio: false }
+        data: {
+          labels: labelsEvol,
+          datasets: [{
+            label: 'Custo Total (R$)',
+            data: labelsEvol.map(l => mesMap[l]),
+            borderColor: '#00a9e0',
+            backgroundColor: 'rgba(0, 169, 224, 0.1)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.3
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
       });
 
-      let uMes = labels[labels.length - 1] || 'jan/2024';
-      let areaMap = {};
-      filteredData.filter(d=>d.mesAno===uMes).forEach(d=>areaMap[d.area]=(areaMap[d.area]||0)+d.valor);
-      let sortedArea = Object.keys(areaMap).sort((a,b)=>areaMap[b]-areaMap[a]);
+      let ultimosMeses = labelsEvol;
+      let ultimoMes = ultimosMeses[ultimosMeses.length - 1] || 'jan/2024';
+      let dadosUltimoMes = filteredData.filter(d => `${d.mes}/${d.ano}` === ultimoMes);
 
-      chartInstances.mesArea = new Chart(document.getElementById('chartMesAtualArea'), {
+      let areaUltimoMes = {};
+      dadosUltimoMes.forEach(d => { areaUltimoMes[d.area] = (areaUltimoMes[d.area] || 0) + d.valor; });
+
+      let sortedAreasUltimoMes = Object.keys(areaUltimoMes).sort((a, b) => areaUltimoMes[b] - areaUltimoMes[a]);
+      let valoresUltimoMes = sortedAreasUltimoMes.map(a => areaUltimoMes[a]);
+      let bgColorsMes = sortedAreasUltimoMes.map((a, idx) => idx === 0 ? '#f43f5e' : '#38bdf8');
+
+      const ctxMes = document.getElementById('chartMesAtualArea').getContext('2d');
+      chartInstances.mesAtual = new Chart(ctxMes, {
         type: 'bar',
-        data: { labels: sortedArea.map(a=>'Área '+a), datasets: [{ data: sortedArea.map(a=>areaMap[a]), backgroundColor: sortedArea.map((a,i)=>i===0?'#f43f5e':'#38bdf8') }] },
-        options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y' }
+        data: {
+          labels: sortedAreasUltimoMes.map(a => `Área ${a}`),
+          datasets: [{
+            label: 'Custo no Mês',
+            data: valoresUltimoMes,
+            backgroundColor: bgColorsMes,
+            borderRadius: 6
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } } }
       });
 
-      let t50 = filteredData.reduce((a,b)=>a+b.h50,0), t100 = filteredData.reduce((a,b)=>a+b.h100,0);
-      let tSob = filteredData.reduce((a,b)=>a+b.sob,0), tNot = filteredData.reduce((a,b)=>a+b.not,0);
+      let totH50 = filteredData.reduce((a, b) => a + b.h50, 0);
+      let totH100 = filteredData.reduce((a, b) => a + b.h100, 0);
+      let totSob = filteredData.reduce((a, b) => a + b.sob, 0);
+      let totNot = filteredData.reduce((a, b) => a + b.not, 0);
 
-      chartInstances.mod = new Chart(document.getElementById('chartModalidade'), {
+      const ctxMod = document.getElementById('chartModalidade').getContext('2d');
+      chartInstances.modalidade = new Chart(ctxMod, {
         type: 'pie',
-        data: { labels: ['50%', '100%', 'Sobreaviso', 'Ad. Noturno'], datasets: [{ data: [t50, t100, tSob, tNot], backgroundColor: ['#3b82f6','#ef4444','#f59e0b','#8b5cf6'] }] },
-        options: { responsive: true, maintainAspectRatio: false }
+        data: {
+          labels: ['Horas 50%', 'Horas 100%', 'Sobreaviso', 'Adic. Noturno'],
+          datasets: [{
+            data: [totH50, totH100, totSob, totNot],
+            backgroundColor: ['#3b82f6', '#ef4444', '#f59e0b', '#8b5cf6']
+          }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+      });
+
+      let modalidadeOfensores = { 'Horas 50%': {}, 'Horas 100%': {}, 'Sobreaviso': {}, 'Adic. Noturno': {} };
+      filteredData.forEach(d => {
+        modalidadeOfensores['Horas 50%'][d.area] = (modalidadeOfensores['Horas 50%'][d.area] || 0) + d.h50;
+        modalidadeOfensores['Horas 100%'][d.area] = (modalidadeOfensores['Horas 100%'][d.area] || 0) + d.h100;
+        modalidadeOfensores['Sobreaviso'][d.area] = (modalidadeOfensores['Sobreaviso'][d.area] || 0) + d.sob;
+        modalidadeOfensores['Adic. Noturno'][d.area] = (modalidadeOfensores['Adic. Noturno'][d.area] || 0) + d.not;
+      });
+
+      let modalitiesList = ['Horas 50%', 'Horas 100%', 'Sobreaviso', 'Adic. Noturno'];
+      let top1Data = [], top2Data = [], top3Data = [];
+
+      modalitiesList.forEach(m => {
+        let sorted = Object.keys(modalidadeOfensores[m]).sort((a,b) => modalidadeOfensores[m][b] - modalidadeOfensores[m][a]);
+        top1Data.push(sorted[0] ? modalidadeOfensores[m][sorted[0]] : 0);
+        top2Data.push(sorted[1] ? modalidadeOfensores[m][sorted[1]] : 0);
+        top3Data.push(sorted[2] ? modalidadeOfensores[m][sorted[2]] : 0);
+      });
+
+      const ctxTop3 = document.getElementById('chartTop3Modalidades').getContext('2d');
+      chartInstances.top3Mod = new Chart(ctxTop3, {
+        type: 'bar',
+        data: {
+          labels: modalitiesList,
+          datasets: [
+            { label: '1º Maior Ofensor', data: top1Data, backgroundColor: '#e11d48' },
+            { label: '2º Maior Ofensor', data: top2Data, backgroundColor: '#f97316' },
+            { label: '3º Maior Ofensor', data: top3Data, backgroundColor: '#eab308' }
+          ]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+      });
+
+      let areaCustoMap = {};
+      filteredData.forEach(d => { areaCustoMap[d.area] = (areaCustoMap[d.area] || 0) + d.valor; });
+      let sortedAreas = Object.keys(areaCustoMap).sort((a,b) => areaCustoMap[b] - areaCustoMap[a]);
+
+      const ctxOfens = document.getElementById('chartAreasOfensoras').getContext('2d');
+      chartInstances.ofensoras = new Chart(ctxOfens, {
+        type: 'bar',
+        data: {
+          labels: sortedAreas.map(a => `Área ${a}`),
+          datasets: [{ label: 'Custo Total', data: sortedAreas.map(a => areaCustoMap[a]), backgroundColor: '#00a9e0' }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+      });
+
+      let areaHCMap = {}, areaMesesSet = {};
+      filteredData.forEach(d => {
+        areaHCMap[d.area] = Math.max(areaHCMap[d.area] || 0, d.hc);
+        if (!areaMesesSet[d.area]) areaMesesSet[d.area] = new Set();
+        areaMesesSet[d.area].add(d.mesAno);
+      });
+
+      let hcValues = sortedAreas.map(a => areaCustoMap[a] / ((areaMesesSet[a].size || 1) * (areaHCMap[a] || 1)));
+
+      const ctxEf = document.getElementById('chartHCEficiencia').getContext('2d');
+      chartInstances.eficiencia = new Chart(ctxEf, {
+        type: 'bar',
+        data: { labels: sortedAreas.map(a => `Área ${a}`), datasets: [{ label: 'R$ / HC / Mês', data: hcValues, backgroundColor: '#8b5cf6' }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+      });
+
+      let hcMesMap = {};
+      filteredData.forEach(d => {
+        let key = `${d.mes}/${d.ano}`;
+        hcMesMap[key] = (hcMesMap[key] || 0) + d.hc;
+      });
+
+      const ctxHCEvol = document.getElementById('chartEvolucaoHC').getContext('2d');
+      chartInstances.evolucaoHC = new Chart(ctxHCEvol, {
+        type: 'line',
+        data: {
+          labels: labelsEvol,
+          datasets: [{ label: 'Headcount Total', data: labelsEvol.map(l => hcMesMap[l]), borderColor: '#f59e0b', backgroundColor: 'rgba(245, 158, 11, 0.1)', fill: true }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
       });
     }
 
     function renderTable() {
+      const tbody = document.getElementById('table-body');
       const search = (document.getElementById('table-search').value || '').toLowerCase();
-      let items = filteredData.filter(d => d.area.toLowerCase().includes(search) || d.ddd.includes(search) || d.mesAno.includes(search));
-      
-      document.getElementById('table-body').innerHTML = items.map(d => `
-        <tr class="hover:bg-slate-50">
-          <td class="p-3 font-bold">${d.mesAno.toUpperCase()}</td>
-          <td class="p-3 text-slate-500">${d.periodo}</td>
-          <td class="p-3">Área ${d.area} (DDD ${d.ddd})</td>
-          <td class="p-3 text-center">${d.hc}</td>
+
+      let filtered = filteredData.filter(d => d.area.toLowerCase().includes(search) || d.ddd.toLowerCase().includes(search) || d.mesAno.toLowerCase().includes(search));
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" class="p-4 text-center text-slate-400">Nenhum registro encontrado.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(d => `
+        <tr class="hover:bg-slate-50 transition">
+          <td class="p-3 font-bold text-slate-900">${d.mesAno.toUpperCase()}</td>
+          <td class="p-3 text-slate-500 text-[11px]">${d.periodo}</td>
+          <td class="p-3 font-semibold"><span class="px-2 py-0.5 bg-slate-100 rounded border border-slate-200">Área ${d.area} (DDD ${d.ddd})</span></td>
+          <td class="p-3 text-center font-bold">${d.hc}</td>
           <td class="p-3 text-right">${d.h50.toFixed(1)}h</td>
           <td class="p-3 text-right">${d.h100.toFixed(1)}h</td>
           <td class="p-3 text-right">${d.sob.toFixed(1)}h</td>
           <td class="p-3 text-right">${d.not.toFixed(1)}h</td>
-          <td class="p-3 text-right font-bold">${fmtR$(d.valor)}</td>
+          <td class="p-3 text-right font-bold text-slate-900">${fmtR$(d.valor)}</td>
         </tr>
       `).join('');
     }
