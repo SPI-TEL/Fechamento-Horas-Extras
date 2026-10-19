@@ -11,28 +11,11 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- PapaParse CDN para Leitura de CSV -->
+  <!-- PapaParse CDN para Leitura do Google Sheets CSV -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            vivo: {
-              navy: '#0b2341',
-              blue: '#00a9e0',
-              purple: '#660099',
-              slate: '#1e293b'
-            }
-          }
-        }
-      }
-    }
-  </script>
   <style>
     body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
-    .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(8px); }
   </style>
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col antialiased selection:bg-sky-500 selection:text-white">
@@ -93,8 +76,8 @@
             <i class="fa-solid fa-clock-rotate-left text-lg"></i>
           </div>
           <div>
-            <h1 class="text-base font-extrabold tracking-wide">FECHAMENTO DE HORAS EXTRAS</h1>
-            <p class="text-[11px] text-sky-200 font-medium">Contrato Vivo SPI • Gestão Operacional e Custos</p>
+            <h1 class="text-base font-extrabold tracking-wide">PORTAL FECHAMENTO HORAS EXTRAS</h1>
+            <p class="text-[11px] text-sky-200 font-medium">Contrato Vivo SPI • Monitoramento e Custos Operacionais</p>
           </div>
         </div>
 
@@ -108,11 +91,11 @@
 
           <div class="flex items-center gap-2">
             <div class="w-8 h-8 rounded-full bg-sky-600 flex items-center justify-center font-bold text-xs">
-              AD
+              SPI
             </div>
             <div class="hidden sm:block text-left text-xs">
               <p class="font-bold leading-tight">Supervisão SPI</p>
-              <p class="text-[10px] text-slate-300">Conectado</p>
+              <p class="text-[10px] text-slate-300">Sessão Ativa</p>
             </div>
           </div>
 
@@ -126,11 +109,11 @@
     <!-- Main Content -->
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-      <!-- Status Bar / Filtros -->
+      <!-- Bar de Filtros -->
       <section class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-4">
         <div class="flex items-center gap-2 text-xs font-semibold text-slate-600">
           <i class="fa-solid fa-filter text-sky-600"></i>
-          <span>Filtros do Dashboard:</span>
+          <span>Filtros do Painel:</span>
         </div>
 
         <div class="flex flex-wrap items-center gap-3">
@@ -138,15 +121,10 @@
             <option value="ALL">Todos os Anos</option>
             <option value="2024" selected>2024</option>
             <option value="2025">2025</option>
-            <option value="2026">2026</option>
           </select>
 
           <select id="filter-area" onchange="applyFilters()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none">
             <option value="ALL">Todas as Áreas</option>
-          </select>
-
-          <select id="filter-categoria" onchange="applyFilters()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none">
-            <option value="ALL">Todas as Categorias</option>
           </select>
 
           <button onclick="resetFilters()" class="text-xs text-slate-500 hover:text-sky-600 font-semibold underline px-2">
@@ -155,29 +133,26 @@
         </div>
       </section>
 
-      <!-- KPI Summary Cards -->
+      <!-- Cards de KPIs Principais -->
       <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <!-- Card 1: Total Custo -->
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
           <div class="flex items-center justify-between text-slate-500 text-xs font-semibold">
-            <span>CUSTO TOTAL (ACUM.)</span>
+            <span>CUSTO TOTAL</span>
             <i class="fa-solid fa-sack-dollar text-emerald-500 text-sm"></i>
           </div>
           <p id="kpi-custo-total" class="text-xl font-extrabold text-slate-900">R$ 0,00</p>
-          <p id="kpi-custo-sub" class="text-[11px] text-slate-500 font-medium">Acumulado do período</p>
+          <p class="text-[11px] text-slate-500 font-medium">Acumulado do Período</p>
         </div>
 
-        <!-- Card 2: Média Mensal -->
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
           <div class="flex items-center justify-between text-slate-500 text-xs font-semibold">
             <span>MÉDIA MENSAL</span>
             <i class="fa-solid fa-chart-line text-sky-500 text-sm"></i>
           </div>
           <p id="kpi-media-mensal" class="text-xl font-extrabold text-slate-900">R$ 0,00</p>
-          <p id="kpi-media-sub" class="text-[11px] text-slate-500 font-medium">Média por mês ativo</p>
+          <p class="text-[11px] text-slate-500 font-medium">Custo Médio por Mês</p>
         </div>
 
-        <!-- Card 3: Mês de Pico -->
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
           <div class="flex items-center justify-between text-slate-500 text-xs font-semibold">
             <span>MÊS DE PICO</span>
@@ -187,51 +162,47 @@
           <p id="kpi-pico-valor" class="text-[11px] text-slate-500 font-medium">R$ 0,00</p>
         </div>
 
-        <!-- Card 4: Custo Médio por Headcount -->
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
           <div class="flex items-center justify-between text-slate-500 text-xs font-semibold">
-            <span>R$ / HC / MÊS</span>
+            <span>CUSTO / HC / MÊS</span>
             <i class="fa-solid fa-user-gear text-purple-500 text-sm"></i>
           </div>
           <p id="kpi-hc-custo" class="text-xl font-extrabold text-slate-900">R$ 0,00</p>
-          <p class="text-[11px] text-slate-500 font-medium">Eficiência por Colaborador</p>
+          <p class="text-[11px] text-slate-500 font-medium">Eficiência p/ Colaborador</p>
         </div>
 
-        <!-- Card 5: Headcount Ativo -->
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
           <div class="flex items-center justify-between text-slate-500 text-xs font-semibold">
-            <span>HEADCOUNT TOTAL</span>
+            <span>HEADCOUNT (MÉDIO)</span>
             <i class="fa-solid fa-users text-amber-500 text-sm"></i>
           </div>
           <p id="kpi-hc-total" class="text-xl font-extrabold text-slate-900">0 HC</p>
-          <p class="text-[11px] text-slate-500 font-medium">Colaboradores registrados</p>
+          <p class="text-[11px] text-slate-500 font-medium">Média do Período</p>
         </div>
       </section>
 
-      <!-- Charts Row 1: Evolução Temporal + Valor Acumulado Mês Atual -->
+      <!-- Linha de Gráficos 1: Evolução Temporal + Acumulado Mês Atual por Área -->
       <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Line Chart: Evolução Mensal -->
         <div class="lg:col-span-2 bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
           <div class="flex items-center justify-between border-b pb-3">
             <div>
-              <h2 class="text-sm font-bold text-slate-900">Evolução do Custo Mensal de Horas Extras</h2>
-              <p class="text-xs text-slate-500">Histórico de custos de 2024 até o mês atual</p>
+              <h2 class="text-sm font-bold text-slate-900">Evolução do Custo Mensal (R$)</h2>
+              <p class="text-xs text-slate-500">Histórico de custos mensais acumulados da operação</p>
             </div>
-            <span class="px-2.5 py-1 bg-sky-50 text-sky-700 text-[10px] font-bold rounded-full uppercase border border-sky-200">Tendência Temporal</span>
+            <span class="px-2.5 py-1 bg-sky-50 text-sky-700 text-[10px] font-bold rounded-full uppercase border border-sky-200">2024 - Mês Atual</span>
           </div>
           <div class="relative h-72">
             <canvas id="chartEvolucaoMensal"></canvas>
           </div>
         </div>
 
-        <!-- Bar/Doughnut Chart: Acumulado do Mês Atual por Área -->
         <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
           <div class="flex items-center justify-between border-b pb-3">
             <div>
               <h2 class="text-sm font-bold text-slate-900">Mês Atual por Área</h2>
-              <p class="text-xs text-slate-500">Distribuição de custos no mês corrente</p>
+              <p class="text-xs text-slate-500">Divisão de custo do último mês fechado</p>
             </div>
-            <span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded-full uppercase border border-emerald-200">Visão Mensal</span>
+            <span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded-full uppercase border border-emerald-200">Último Fechamento</span>
           </div>
           <div class="relative h-72 flex items-center justify-center">
             <canvas id="chartMesAtualArea"></canvas>
@@ -239,85 +210,57 @@
         </div>
       </section>
 
-      <!-- Charts Row 2: Comparativo por Categoria + Custo por Headcount por Área -->
-      <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        
-        <!-- Comparativo por Categoria (Últimos 3 Meses / Visão Flexível) -->
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
-          <div class="flex flex-wrap items-center justify-between border-b pb-3 gap-2">
-            <div>
-              <h2 class="text-sm font-bold text-slate-900">Comparativo por Categoria</h2>
-              <p class="text-xs text-slate-500">Análise histórica recente x agregada</p>
-            </div>
-            <div class="inline-flex rounded-lg border border-slate-200 p-0.5 bg-slate-50 text-[11px] font-semibold">
-              <button id="btn-comp-3m" onclick="toggleCategoriaModo('3M')" class="px-2.5 py-1 rounded-md bg-white text-slate-900 shadow-xs">Últimos 3 Meses</button>
-              <button id="btn-comp-anual" onclick="toggleCategoriaModo('ANUAL')" class="px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900">Comparativo Anual</button>
-            </div>
-          </div>
-          <div class="relative h-72">
-            <canvas id="chartComparativoCategoria"></canvas>
-          </div>
-        </div>
-
-        <!-- Custo Médio Mensal por Colaborador (R$/HC/Mês) por Área -->
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
-          <div class="flex items-center justify-between border-b pb-3">
-            <div>
-              <h2 class="text-sm font-bold text-slate-900">Custo Médio por Colaborador por Área</h2>
-              <p class="text-xs text-slate-500">Eficiência financeira (R$ / Headcount / Mês)</p>
-            </div>
-            <span class="px-2.5 py-1 bg-purple-50 text-purple-700 text-[10px] font-bold rounded-full uppercase border border-purple-200">R$/HC/Mês</span>
-          </div>
-          <div class="relative h-72">
-            <canvas id="chartHCEficiencia"></canvas>
-          </div>
-        </div>
-
-      </section>
-
-      <!-- Charts Row 3: Modalidade de Horas & Regiões Ofensoras -->
+      <!-- Linha de Gráficos 2: Distribuição de Modalidades + Regiões/Áreas Ofensoras -->
       <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        <!-- Modalidade de Horas (50%, 100%, Noturna, etc) -->
         <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
           <div class="flex items-center justify-between border-b pb-3">
             <div>
-              <h2 class="text-sm font-bold text-slate-900">Modalidade de Horas</h2>
-              <p class="text-xs text-slate-500">Proporção por tipo de hora extra</p>
+              <h2 class="text-sm font-bold text-slate-900">Distribuição por Modalidade (Horas)</h2>
+              <p class="text-xs text-slate-500">Proporção total de 50%, 100%, Sobreaviso e Ad. Noturno</p>
             </div>
-            <i class="fa-solid fa-chart-pie text-slate-400"></i>
+            <i class="fa-solid fa-pie-chart text-slate-400"></i>
           </div>
-          <div class="relative h-64 flex items-center justify-center">
+          <div class="relative h-72 flex items-center justify-center">
             <canvas id="chartModalidade"></canvas>
           </div>
         </div>
 
-        <!-- Regiões Ofensoras (Top Custos Regionalizados) -->
         <div class="lg:col-span-2 bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
           <div class="flex items-center justify-between border-b pb-3">
             <div>
-              <h2 class="text-sm font-bold text-slate-900">Regiões e Unidades Ofensoras</h2>
-              <p class="text-xs text-slate-500">Maiores concentradores de custo de Horas Extras</p>
+              <h2 class="text-sm font-bold text-slate-900">Áreas / Regiões Ofensoras (Custo Total)</h2>
+              <p class="text-xs text-slate-500">Ranking das áreas com maior volume financeiro de horas extras</p>
             </div>
-            <span class="px-2.5 py-1 bg-rose-50 text-rose-700 text-[10px] font-bold rounded-full uppercase border border-rose-200">Rank Offenders</span>
+            <span class="px-2.5 py-1 bg-rose-50 text-rose-700 text-[10px] font-bold rounded-full uppercase border border-rose-200">Top Ofensores</span>
           </div>
-          <div class="relative h-64">
-            <canvas id="chartRegioesOfensoras"></canvas>
+          <div class="relative h-72">
+            <canvas id="chartAreasOfensoras"></canvas>
           </div>
         </div>
-
       </section>
 
-      <!-- Data Table View -->
+      <!-- Linha de Gráficos 3: Custo Médio por Colaborador (R$/HC/Mês) por Área -->
+      <section class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+        <div class="flex items-center justify-between border-b pb-3">
+          <div>
+            <h2 class="text-sm font-bold text-slate-900">Custo Médio Mensal por Colaborador (R$ / HC / Mês) por Área</h2>
+            <p class="text-xs text-slate-500">Indicador de eficiência operacional de horas extras por Headcount ativo</p>
+          </div>
+          <span class="px-2.5 py-1 bg-purple-50 text-purple-700 text-[10px] font-bold rounded-full uppercase border border-purple-200">Eficiência R$/HC</span>
+        </div>
+        <div class="relative h-72">
+          <canvas id="chartHCEficiencia"></canvas>
+        </div>
+      </section>
+
+      <!-- Tabela de Dados Detalhada -->
       <section class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         <div class="p-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-4 bg-slate-50">
           <div>
-            <h3 class="text-sm font-bold text-slate-900">Detalhamento dos Registros de Horas Extras</h3>
-            <p class="text-xs text-slate-500">Dados consolidados extraídos em tempo real da planilha</p>
+            <h3 class="text-sm font-bold text-slate-900">Detalhamento por Área e Período</h3>
+            <p class="text-xs text-slate-500">Registros consolidados sincronizados do Google Sheets</p>
           </div>
-          <div class="flex items-center gap-2">
-            <input type="text" id="table-search" oninput="filterTable()" placeholder="Buscar colaborador, área, modalidade..." class="text-xs bg-white border border-slate-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-sky-500 focus:outline-none w-64">
-          </div>
+          <input type="text" id="table-search" oninput="renderTable()" placeholder="Buscar área, mês..." class="text-xs bg-white border border-slate-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-sky-500 focus:outline-none w-64">
         </div>
 
         <div class="overflow-x-auto max-h-80">
@@ -325,16 +268,18 @@
             <thead class="bg-slate-100 text-slate-700 uppercase tracking-wider text-[10px] sticky top-0 border-b border-slate-200">
               <tr>
                 <th class="p-3 font-bold">Mês/Ano</th>
+                <th class="p-3 font-bold">Período Fechamento</th>
                 <th class="p-3 font-bold">Área</th>
-                <th class="p-3 font-bold">Região / Local</th>
-                <th class="p-3 font-bold">Categoria</th>
-                <th class="p-3 font-bold">Modalidade</th>
-                <th class="p-3 font-bold text-right">Horas</th>
-                <th class="p-3 font-bold text-right">Valor Total (R$)</th>
+                <th class="p-3 font-bold text-center">HC</th>
+                <th class="p-3 font-bold text-right">Horas 50%</th>
+                <th class="p-3 font-bold text-right">Horas 100%</th>
+                <th class="p-3 font-bold text-right">Sobreaviso</th>
+                <th class="p-3 font-bold text-right">Ad. Noturno</th>
+                <th class="p-3 font-bold text-right">Valor Total</th>
               </tr>
             </thead>
             <tbody id="table-body" class="divide-y divide-slate-100 text-slate-700">
-              <!-- Rendered dynamically -->
+              <!-- Preenchido dinamicamente -->
             </tbody>
           </table>
         </div>
@@ -344,30 +289,26 @@
 
     <!-- Footer -->
     <footer class="bg-slate-900 text-slate-400 text-[11px] py-4 text-center border-t border-slate-800">
-      <p>CONTRATO VIVO - SPI • Painel Gerencial de Horas Extras • Atualização Integrada Google Sheets</p>
+      <p>CONTRATO VIVO - SPI • Painel Gerencial de Horas Extras • Dados integrados via Google Sheets</p>
     </footer>
 
   </div>
 
-  <!-- ================= JAVASCRIPT LOGIC ================= -->
+  <!-- ================= LÓGICA JAVASCRIPT ================= -->
   <script>
     const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQZQ1H_MHtywA4MhrFlGkuLCL0lNQmwwjVDObrj2iryoxNlLdat0pwQFJyDDY6WImYbLDwauF_41E_k/pub?gid=135833026&single=true&output=csv';
 
     let rawData = [];
     let filteredData = [];
     let chartInstances = {};
-    let categoriaModo = '3M';
 
-    // 1. AUTENTICAÇÃO
+    // 1. LOGIN
     function handleLogin(event) {
       event.preventDefault();
       const user = document.getElementById('login-user').value;
       const pass = document.getElementById('login-pass').value;
-      const alertBox = document.getElementById('login-alert');
 
-      // Credencial padrão ou aceite genérico para ambiente seguro
       if ((user.trim().toLowerCase() === 'admin' && pass === 'admin123') || user.trim() !== '') {
-        alertBox.classList.add('hidden');
         document.getElementById('login-screen').classList.add('opacity-0');
         setTimeout(() => {
           document.getElementById('login-screen').classList.add('hidden');
@@ -376,7 +317,7 @@
           loadGoogleSheetData();
         }, 300);
       } else {
-        alertBox.classList.remove('hidden');
+        document.getElementById('login-alert').classList.remove('hidden');
       }
     }
 
@@ -387,7 +328,26 @@
       document.getElementById('login-screen').classList.remove('opacity-0');
     }
 
-    // 2. CARREGAMENTO DE DADOS CSV
+    // Convertor HH:MM:SS para horas decimais
+    function timeToHours(timeStr) {
+      if (!timeStr) return 0;
+      let parts = timeStr.toString().trim().split(':');
+      if (parts.length < 2) return parseFloat(timeStr) || 0;
+      let h = parseInt(parts[0], 10) || 0;
+      let m = parseInt(parts[1], 10) || 0;
+      let s = parts[2] ? parseInt(parts[2], 10) || 0 : 0;
+      return h + (m / 60) + (s / 3600);
+    }
+
+    // Convertor Monetário R$
+    function parseCurrency(val) {
+      if (!val) return 0;
+      if (typeof val === 'number') return val;
+      let clean = val.toString().replace('R$', '').replace(/\./g, '').replace(',', '.').trim();
+      return parseFloat(clean) || 0;
+    }
+
+    // 2. CARREGAMENTO DOS DADOS CSV
     function loadGoogleSheetData() {
       const syncIcon = document.getElementById('sync-icon');
       if (syncIcon) syncIcon.classList.add('fa-spin');
@@ -404,117 +364,89 @@
             loadMockFallbackData();
           }
         },
-        error: function(err) {
-          console.warn("Falha ao baixar CSV ao vivo (possível restrição de CORS local). Carregando base demonstrativa enriquecida...", err);
+        error: function() {
           if (syncIcon) syncIcon.classList.remove('fa-spin');
           loadMockFallbackData();
         }
       });
     }
 
-    // Normalizador de colunas e limpeza de valores monetários
+    // Processador de estrutura exatamente como a planilha fornecida
     function processParsedData(data) {
-      rawData = data.map((row, index) => {
-        const parseNum = (val) => {
-          if (!val) return 0;
-          if (typeof val === 'number') return val;
-          let clean = val.toString().replace('R$', '').replace(/\./g, '').replace(',', '.').trim();
-          return parseFloat(clean) || 0;
-        };
+      rawData = data.map((row, idx) => {
+        const ano = row['ANO'] || row['Ano'] || '2024';
+        const mes = row['MÊS'] || row['Mês'] || row['Mes'] || 'jan';
+        const periodo = row['PERÍODO FECHAMENTO'] || row['PERIODO FECHAMENTO'] || '';
+        const area = (row['ÁREAS'] || row['AREAS'] || row['Área'] || '').toString().trim();
+        const hc = parseInt(row['HC '] || row['HC'] || 0, 10);
 
-        const ano = row['Ano'] || row['ANO'] || row['ano'] || '2024';
-        const mes = row['Mês'] || row['Mes'] || row['MES'] || 'Jan';
-        const area = row['Área'] || row['Area'] || row['AREA'] || 'Operação SPI';
-        const categoria = row['Categoria'] || row['CATEGORIA'] || 'Manutenção';
-        const modalidade = row['Modalidade'] || row['MODALIDADE'] || 'HE 50%';
-        const regiao = row['Região'] || row['Regiao'] || row['REGIAO'] || row['UF'] || 'SPI - Centro';
-        const custo = parseNum(row['Valor'] || row['Custo'] || row['Valor Total'] || row['CUSTO']);
-        const horas = parseNum(row['Horas'] || row['HORAS'] || row['Qtd Horas']);
-        const hc = parseNum(row['Headcount'] || row['HC'] || row['Colaboradores']) || 1;
+        const h50 = timeToHours(row['HORAS 50% '] || row['HORAS 50%']);
+        const h100 = timeToHours(row['HORAS 100%'] || row['HORAS 100% ']);
+        const sob = timeToHours(row['SOBREAVISO'] || row['SOBREAVISO ']);
+        const not = timeToHours(row['AD.NOTURNO'] || row['AD.NOTURNO ']);
+        const valor = parseCurrency(row['VALOR TOTAL $'] || row['VALOR TOTAL']);
 
         return {
-          id: index,
-          ano: String(ano).trim(),
-          mes: String(mes).trim(),
-          mesAno: `${String(mes).trim()}/${String(ano).trim()}`,
-          area: String(area).trim(),
-          categoria: String(categoria).trim(),
-          modalidade: String(modalidade).trim(),
-          regiao: String(regiao).trim(),
-          custo: custo,
-          horas: horas,
-          hc: hc
+          id: idx,
+          ano: ano.toString().trim(),
+          mes: mes.toString().trim(),
+          mesAno: `${mes.toString().trim()}/${ano.toString().trim()}`,
+          periodo: periodo,
+          area: area,
+          hc: hc,
+          h50: h50,
+          h100: h100,
+          sob: sob,
+          not: not,
+          valor: valor
         };
-      }).filter(item => item.custo > 0 || item.horas > 0);
+      }).filter(item => item.area !== '' && item.area.toUpperCase() !== 'TOTAL'); // Ignorar linhas agregadas "TOTAL"
 
       populateSelectOptions();
       applyFilters();
     }
 
-    // Mock dataset representativo para visualização imediata se offline/CORS
+    // Base demonstrativa exata caso ocorra bloqueio de carregamento
     function loadMockFallbackData() {
-      const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-      const anos = ['2024', '2025', '2026'];
-      const areas = ['Rede Externa', 'Core & IP', 'Serviços de Campo', 'TX & Fibra', 'Engenharia SPI'];
-      const categorias = ['Atendimento Crítico', 'Preventiva', 'Emergencial', 'Expansão', 'Projetos Especiais'];
-      const modalidades = ['HE 50%', 'HE 100%', 'Sobreaviso', 'Adicional Noturno'];
-      const regioes = ['SPI - Campinas', 'SPI - Bauru', 'SPI - Ribeirão Preto', 'SPI - Sorocaba', 'SPI - S.J. Campos'];
-
-      let generated = [];
-      let idx = 0;
-
-      anos.forEach(ano => {
-        meses.forEach(mes => {
-          // Limitar 2026 até mês atual simulado
-          if (ano === '2026' && ['Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'].includes(mes)) return;
-
-          areas.forEach(area => {
-            categorias.forEach(cat => {
-              const baseCusto = Math.floor(Math.random() * 8000) + 2500;
-              generated.push({
-                id: idx++,
-                ano: ano,
-                mes: mes,
-                mesAno: `${mes}/${ano}`,
-                area: area,
-                categoria: cat,
-                modalidade: modalidades[Math.floor(Math.random() * modalidades.length)],
-                regiao: regioes[Math.floor(Math.random() * regioes.length)],
-                custo: baseCusto,
-                horas: Math.floor(baseCusto / 45),
-                hc: Math.floor(Math.random() * 12) + 5
-              });
-            });
-          });
-        });
-      });
-
-      processParsedData(generated);
+      const sample = [
+        { ANO: '2024', MÊS: 'jan', 'PERÍODO FECHAMENTO': '15/12/2023 - 14/01/2024', ÁREAS: '12', HC: '60', 'HORAS 50%': '451:03:00', 'HORAS 100%': '698:38:00', SOBREAVISO: '2925:18:00', 'AD.NOTURNO': '1156:48:00', 'VALOR TOTAL $': 'R$ 72.939,85' },
+        { ANO: '2024', MÊS: 'jan', 'PERÍODO FECHAMENTO': '15/12/2023 - 14/01/2024', ÁREAS: '14', HC: '64', 'HORAS 50%': '762:13:00', 'HORAS 100%': '415:58:00', SOBREAVISO: '4594:36:00', 'AD.NOTURNO': '678:02:00', 'VALOR TOTAL $': 'R$ 74.370,53' },
+        { ANO: '2024', MÊS: 'jan', 'PERÍODO FECHAMENTO': '15/12/2023 - 14/01/2024', ÁREAS: '15', HC: '51', 'HORAS 50%': '642:45:00', 'HORAS 100%': '570:10:00', SOBREAVISO: '2381:36:00', 'AD.NOTURNO': '975:34:00', 'VALOR TOTAL $': 'R$ 63.399,91' },
+        { ANO: '2024', MÊS: 'jan', 'PERÍODO FECHAMENTO': '15/12/2023 - 14/01/2024', ÁREAS: '16', HC: '65', 'HORAS 50%': '591:47:00', 'HORAS 100%': '478:11:00', SOBREAVISO: '3986:49:00', 'AD.NOTURNO': '623:39:00', 'VALOR TOTAL $': 'R$ 72.626,65' },
+        { ANO: '2024', MÊS: 'jan', 'PERÍODO FECHAMENTO': '15/12/2023 - 14/01/2024', ÁREAS: '17', HC: '45', 'HORAS 50%': '268:46:00', 'HORAS 100%': '182:10:00', SOBREAVISO: '3675:08:00', 'AD.NOTURNO': '594:00:00', 'VALOR TOTAL $': 'R$ 45.605,22' },
+        { ANO: '2024', MÊS: 'jan', 'PERÍODO FECHAMENTO': '15/12/2023 - 14/01/2024', ÁREAS: '18', HC: '38', 'HORAS 50%': '301:29:00', 'HORAS 100%': '283:53:00', SOBREAVISO: '2813:22:00', 'AD.NOTURNO': '457:14:00', 'VALOR TOTAL $': 'R$ 44.767,81' },
+        { ANO: '2024', MÊS: 'jan', 'PERÍODO FECHAMENTO': '15/12/2023 - 14/01/2024', ÁREAS: '19-CAS', HC: '68', 'HORAS 50%': '588:48:00', 'HORAS 100%': '525:23:00', SOBREAVISO: '3840:37:00', 'AD.NOTURNO': '859:49:00', 'VALOR TOTAL $': 'R$ 75.957,08' },
+        { ANO: '2024', MÊS: 'jan', 'PERÍODO FECHAMENTO': '15/12/2023 - 14/01/2024', ÁREAS: '19-PAA', HC: '60', 'HORAS 50%': '662:52:56', 'HORAS 100%': '393:27:58', SOBREAVISO: '5085:11:03', 'AD.NOTURNO': '527:46:57', 'VALOR TOTAL $': 'R$ 64.401,75' },
+        { ANO: '2024', MÊS: 'jan', 'PERÍODO FECHAMENTO': '15/12/2023 - 14/01/2024', ÁREAS: 'CRISE', HC: '15', 'HORAS 50%': '6:29:00', 'HORAS 100%': '35:59:00', SOBREAVISO: '906:34:00', 'AD.NOTURNO': '254:24:00', 'VALOR TOTAL $': 'R$ 15.469,13' },
+        { ANO: '2024', MÊS: 'fev', 'PERÍODO FECHAMENTO': '15/01/2024 - 14/02/2024', ÁREAS: '12', HC: '62', 'HORAS 50%': '634:03:00', 'HORAS 100%': '434:05:00', SOBREAVISO: '2227:09:00', 'AD.NOTURNO': '1214:05:00', 'VALOR TOTAL $': 'R$ 55.888,32' },
+        { ANO: '2024', MÊS: 'fev', 'PERÍODO FECHAMENTO': '15/01/2024 - 14/02/2024', ÁREAS: '14', HC: '66', 'HORAS 50%': '962:58:00', 'HORAS 100%': '324:20:00', SOBREAVISO: '4469:50:00', 'AD.NOTURNO': '869:40:00', 'VALOR TOTAL $': 'R$ 70.051,25' },
+        { ANO: '2024', MÊS: 'mar', 'PERÍODO FECHAMENTO': '15/02/2024 - 14/03/2024', ÁREAS: '12', HC: '62', 'HORAS 50%': '549:02:00', 'HORAS 100%': '383:46:00', SOBREAVISO: '1868:26:00', 'AD.NOTURNO': '1065:14:00', 'VALOR TOTAL $': 'R$ 48.865,06' },
+        { ANO: '2024', MÊS: 'abr', 'PERÍODO FECHAMENTO': '15/03/2024 - 14/04/2024', ÁREAS: '16', HC: '65', 'HORAS 50%': '569:38:00', 'HORAS 100%': '417:55:00', SOBREAVISO: '3994:10:59', 'AD.NOTURNO': '597:52:00', 'VALOR TOTAL $': 'R$ 63.174,41' },
+        { ANO: '2024', MÊS: 'mai', 'PERÍODO FECHAMENTO': '15/04/2024 - 14/05/2024', ÁREAS: '16', HC: '65', 'HORAS 50%': '701:27:00', 'HORAS 100%': '420:38:00', SOBREAVISO: '3720:06:00', 'AD.NOTURNO': '506:29:00', 'VALOR TOTAL $': 'R$ 66.373,99' },
+        { ANO: '2024', MÊS: 'jun', 'PERÍODO FECHAMENTO': '15/05/2024 - 14/06/2024', ÁREAS: '19-CAS', HC: '65', 'HORAS 50%': '584:45:00', 'HORAS 100%': '539:34:00', SOBREAVISO: '3265:30:00', 'AD.NOTURNO': '866:18:00', 'VALOR TOTAL $': 'R$ 64.803,31' },
+        { ANO: '2024', MÊS: 'jul', 'PERÍODO FECHAMENTO': '15/06/2024 - 14/07/2024', ÁREAS: '16', HC: '67', 'HORAS 50%': '442:03:00', 'HORAS 100%': '555:39:00', SOBREAVISO: '4070:06:00', 'AD.NOTURNO': '547:55:00', 'VALOR TOTAL $': 'R$ 66.350,14' },
+        { ANO: '2024', MÊS: 'ago', 'PERÍODO FECHAMENTO': '15/07/2024 - 14/08/2024', ÁREAS: '14', HC: '64', 'HORAS 50%': '793:44:00', 'HORAS 100%': '244:12:00', SOBREAVISO: '4601:52:00', 'AD.NOTURNO': '700:48:50', 'VALOR TOTAL $': 'R$ 64.051,35' },
+        { ANO: '2024', MÊS: 'set', 'PERÍODO FECHAMENTO': '15/08/2024 - 14/09/2024', ÁREAS: '19-CAS', HC: '67', 'HORAS 50%': '749:58:00', 'HORAS 100%': '661:00:00', SOBREAVISO: '4150:52:00', 'AD.NOTURNO': '762:56:00', 'VALOR TOTAL $': 'R$ 76.851,65' }
+      ];
+      processParsedData(sample);
     }
 
     // 3. POPULAR SELETORES
     function populateSelectOptions() {
       const areaSelect = document.getElementById('filter-area');
-      const catSelect = document.getElementById('filter-categoria');
-
       const areas = [...new Set(rawData.map(d => d.area))].sort();
-      const categorias = [...new Set(rawData.map(d => d.categoria))].sort();
-
-      areaSelect.innerHTML = '<option value="ALL">Todas as Áreas</option>' + areas.map(a => `<option value="${a}">${a}</option>`).join('');
-      catSelect.innerHTML = '<option value="ALL">Todas as Categorias</option>' + categorias.map(c => `<option value="${c}">${c}</option>`).join('');
+      areaSelect.innerHTML = '<option value="ALL">Todas as Áreas</option>' + areas.map(a => `<option value="${a}">Área ${a}</option>`).join('');
     }
 
-    // 4. APLICAÇÃO DE FILTROS & CÁLCULOS
+    // 4. FILTROS
     function applyFilters() {
       const selectedAno = document.getElementById('filter-ano').value;
       const selectedArea = document.getElementById('filter-area').value;
-      const selectedCat = document.getElementById('filter-categoria').value;
 
       filteredData = rawData.filter(item => {
         const matchAno = (selectedAno === 'ALL' || item.ano === selectedAno);
         const matchArea = (selectedArea === 'ALL' || item.area === selectedArea);
-        const matchCat = (selectedCat === 'ALL' || item.categoria === selectedCat);
-        return matchAno && matchArea && matchCat;
+        return matchAno && matchArea;
       });
 
       renderKPIs();
@@ -525,7 +457,6 @@
     function resetFilters() {
       document.getElementById('filter-ano').value = '2024';
       document.getElementById('filter-area').value = 'ALL';
-      document.getElementById('filter-categoria').value = 'ALL';
       applyFilters();
     }
 
@@ -533,20 +464,17 @@
       return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     }
 
-    // 5. RENDERIZAÇÃO DOS KPIS
+    // 5. CÁLCULO E RENDERIZAÇÃO DE KPIS
     function renderKPIs() {
-      const totalCusto = filteredData.reduce((acc, d) => acc + d.custo, 0);
-      const totalHC = Math.max(1, [...new Set(filteredData.map(d => d.area + '-' + d.hc))].reduce((acc, curr) => acc + parseInt(curr.split('-')[1] || 1), 0));
-
-      // Média mensal por mês único presente na seleção
+      const totalCusto = filteredData.reduce((acc, d) => acc + d.valor, 0);
       const mesesUnicos = [...new Set(filteredData.map(d => d.mesAno))];
       const numMeses = mesesUnicos.length || 1;
       const mediaMensal = totalCusto / numMeses;
 
-      // Mês de Pico
+      // Pico
       let custoPorMes = {};
       filteredData.forEach(d => {
-        custoPorMes[d.mesAno] = (custoPorMes[d.mesAno] || 0) + d.custo;
+        custoPorMes[d.mesAno] = (custoPorMes[d.mesAno] || 0) + d.valor;
       });
 
       let picoMes = '--';
@@ -558,215 +486,160 @@
         }
       });
 
-      const hcCustoMedio = totalCusto / (numMeses * (totalHC || 1));
+      // Headcount Médio
+      let hcMedio = Math.round(filteredData.reduce((a, b) => a + b.hc, 0) / (filteredData.length || 1));
+      let hcCustoMedio = totalCusto / (numMeses * (hcMedio || 1));
 
       document.getElementById('kpi-custo-total').innerText = fmtR$(totalCusto);
       document.getElementById('kpi-media-mensal').innerText = fmtR$(mediaMensal);
       document.getElementById('kpi-mes-pico').innerText = picoMes;
       document.getElementById('kpi-pico-valor').innerText = `Pico: ${fmtR$(picoValor)}`;
       document.getElementById('kpi-hc-custo').innerText = fmtR$(hcCustoMedio);
-      document.getElementById('kpi-hc-total').innerText = `${totalHC} HC`;
+      document.getElementById('kpi-hc-total').innerText = `${hcMedio} HC`;
     }
 
-    // 6. RENDERIZAÇÃO DE GRÁFICOS (CHART.JS)
+    // 6. RENDERIZAÇÃO DOS GRÁFICOS (CHART.JS)
     function renderCharts() {
-      // Destruir instâncias prévias se existirem
-      Object.keys(chartInstances).forEach(key => {
-        if (chartInstances[key]) chartInstances[key].destroy();
-      });
+      Object.keys(chartInstances).forEach(k => { if (chartInstances[k]) chartInstances[k].destroy(); });
 
-      renderChartEvolucaoMensal();
-      renderChartMesAtualArea();
-      renderChartComparativoCategoria();
-      renderChartHCEficiencia();
-      renderChartModalidade();
-      renderChartRegioesOfensoras();
-    }
+      const ordemMeses = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
 
-    // Chart 1: Evolução do Custo Mensal (2024 a mês atual)
-    function renderChartEvolucaoMensal() {
-      let mesOrdem = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-      let agrupado = {};
-
+      // Chart 1: Evolução Mensal
+      let mesMap = {};
       filteredData.forEach(d => {
         let key = `${d.mes}/${d.ano}`;
-        agrupado[key] = (agrupado[key] || 0) + d.custo;
+        mesMap[key] = (mesMap[key] || 0) + d.valor;
       });
 
-      let labels = Object.keys(agrupado).sort((a, b) => {
+      let labelsEvol = Object.keys(mesMap).sort((a,b) => {
         let [mA, aA] = a.split('/');
         let [mB, aB] = b.split('/');
         if (aA !== aB) return aA - aB;
-        return mesOrdem.indexOf(mA) - mesOrdem.indexOf(mB);
+        return ordemMeses.indexOf(mA) - ordemMeses.indexOf(mB);
       });
 
-      let values = labels.map(l => agrupado[l]);
-
-      const ctx = document.getElementById('chartEvolucaoMensal').getContext('2d');
-      chartInstances.evolucao = new Chart(ctx, {
+      const ctxEvol = document.getElementById('chartEvolucaoMensal').getContext('2d');
+      chartInstances.evolucao = new Chart(ctxEvol, {
         type: 'line',
         data: {
-          labels: labels,
+          labels: labelsEvol,
           datasets: [{
             label: 'Custo Total (R$)',
-            data: values,
+            data: labelsEvol.map(l => mesMap[l]),
             borderColor: '#00a9e0',
             backgroundColor: 'rgba(0, 169, 224, 0.1)',
             borderWidth: 3,
             fill: true,
             tension: 0.3,
             pointBackgroundColor: '#0b2341',
-            pointRadius: 4
+            pointRadius: 5
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              callbacks: {
-                label: (ctx) => ` Custo: ${fmtR$(ctx.raw)}`
-              }
-            }
-          },
-          scales: {
-            y: { ticks: { callback: v => 'R$ ' + (v/1000).toFixed(0) + 'k' } }
-          }
+          plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` Custo: ${fmtR$(c.raw)}` } } },
+          scales: { y: { ticks: { callback: v => 'R$ ' + (v/1000).toFixed(0) + 'k' } } }
         }
       });
-    }
 
-    // Chart 2: Valor Acumulado do Mês Atual por Área
-    function renderChartMesAtualArea() {
-      // Identificar o último mês disponível no dataset filtrado
-      let ultimosMeses = [...new Set(filteredData.map(d => d.mesAno))];
-      let ultimoMes = ultimosMeses[ultimosMeses.length - 1] || 'Jan/2024';
+      // Chart 2: Mês Atual por Área
+      let ultimosMeses = labelsEvol;
+      let ultimoMes = ultimosMeses[ultimosMeses.length - 1] || 'jan/2024';
+      let dadosUltimoMes = filteredData.filter(d => `${d.mes}/${d.ano}` === ultimoMes);
 
-      let dadosMesAtual = filteredData.filter(d => d.mesAno === ultimoMes);
-      let areaMap = {};
-      dadosMesAtual.forEach(d => {
-        areaMap[d.area] = (areaMap[d.area] || 0) + d.custo;
-      });
+      let areaUltimoMes = {};
+      dadosUltimoMes.forEach(d => { areaUltimoMes[d.area] = (areaUltimoMes[d.area] || 0) + d.valor; });
 
-      let labels = Object.keys(areaMap);
-      let values = Object.values(areaMap);
-
-      const ctx = document.getElementById('chartMesAtualArea').getContext('2d');
-      chartInstances.mesAtualArea = new Chart(ctx, {
+      const ctxMes = document.getElementById('chartMesAtualArea').getContext('2d');
+      chartInstances.mesAtual = new Chart(ctxMes, {
         type: 'doughnut',
         data: {
-          labels: labels,
+          labels: Object.keys(areaUltimoMes).map(a => `Área ${a}`),
           datasets: [{
-            data: values,
-            backgroundColor: ['#00a9e0', '#660099', '#10b981', '#f59e0b', '#ef4444', '#64748b']
+            data: Object.values(areaUltimoMes),
+            backgroundColor: ['#00a9e0', '#660099', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#64748b']
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: {
-            legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } },
-            tooltip: { callbacks: { label: (c) => ` ${c.label}: ${fmtR$(c.raw)}` } }
-          }
+          plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } }, tooltip: { callbacks: { label: c => ` ${c.label}: ${fmtR$(c.raw)}` } } }
         }
       });
-    }
 
-    // Chart 3: Comparativo por Categoria
-    function toggleCategoriaModo(modo) {
-      categoriaModo = modo;
-      document.getElementById('btn-comp-3m').className = modo === '3M' ? 'px-2.5 py-1 rounded-md bg-white text-slate-900 shadow-xs font-bold' : 'px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900';
-      document.getElementById('btn-comp-anual').className = modo === 'ANUAL' ? 'px-2.5 py-1 rounded-md bg-white text-slate-900 shadow-xs font-bold' : 'px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900';
-      renderChartComparativoCategoria();
-    }
+      // Chart 3: Modalidades (Horas)
+      let totH50 = filteredData.reduce((a, b) => a + b.h50, 0);
+      let totH100 = filteredData.reduce((a, b) => a + b.h100, 0);
+      let totSob = filteredData.reduce((a, b) => a + b.sob, 0);
+      let totNot = filteredData.reduce((a, b) => a + b.not, 0);
 
-    function renderChartComparativoCategoria() {
-      const ctx = document.getElementById('chartComparativoCategoria').getContext('2d');
-      if (chartInstances.categoria) chartInstances.categoria.destroy();
-
-      let categorias = [...new Set(filteredData.map(d => d.categoria))];
-
-      if (categoriaModo === '3M') {
-        // Obter últimos 3 meses únicos
-        let todosMeses = [...new Set(filteredData.map(d => d.mesAno))];
-        let ultimos3 = todosMeses.slice(-3);
-
-        let datasets = ultimos3.map((m, idx) => {
-          let colors = ['#93c5fd', '#3b82f6', '#1d4ed8'];
-          return {
-            label: m,
-            data: categorias.map(c => {
-              return filteredData.filter(d => d.categoria === c && d.mesAno === m).reduce((a, b) => a + b.custo, 0);
-            }),
-            backgroundColor: colors[idx % colors.length]
-          };
-        });
-
-        chartInstances.categoria = new Chart(ctx, {
-          type: 'bar',
-          data: { labels: categorias, datasets: datasets },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${fmtR$(c.raw)}` } } },
-            scales: { y: { ticks: { callback: v => 'R$ ' + (v/1000).toFixed(0) + 'k' } } }
-          }
-        });
-
-      } else {
-        // Visão Anual Agregada
-        let anos = [...new Set(filteredData.map(d => d.ano))];
-        let colors = ['#00a9e0', '#660099', '#f59e0b'];
-
-        let datasets = anos.map((ano, idx) => ({
-          label: `Ano ${ano}`,
-          data: categorias.map(c => filteredData.filter(d => d.categoria === c && d.ano === ano).reduce((a, b) => a + b.custo, 0)),
-          backgroundColor: colors[idx % colors.length]
-        }));
-
-        chartInstances.categoria = new Chart(ctx, {
-          type: 'bar',
-          data: { labels: categorias, datasets: datasets },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${fmtR$(c.raw)}` } } },
-            scales: { y: { ticks: { callback: v => 'R$ ' + (v/1000).toFixed(0) + 'k' } } }
-          }
-        });
-      }
-    }
-
-    // Chart 4: Custo Médio Mensal por Colaborador (R$/HC/Mês) por Área
-    function renderChartHCEficiencia() {
-      let areaHC = {};
-      let areaCusto = {};
-      let areaMeses = {};
-
-      filteredData.forEach(d => {
-        areaCusto[d.area] = (areaCusto[d.area] || 0) + d.custo;
-        areaHC[d.area] = Math.max(areaHC[d.area] || 0, d.hc);
-        if (!areaMeses[d.area]) areaMeses[d.area] = new Set();
-        areaMeses[d.area].add(d.mesAno);
+      const ctxMod = document.getElementById('chartModalidade').getContext('2d');
+      chartInstances.modalidade = new Chart(ctxMod, {
+        type: 'pie',
+        data: {
+          labels: ['Horas 50%', 'Horas 100%', 'Sobreaviso', 'Adic. Noturno'],
+          datasets: [{
+            data: [totH50, totH100, totSob, totNot],
+            backgroundColor: ['#3b82f6', '#ef4444', '#f59e0b', '#8b5cf6']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } }, tooltip: { callbacks: { label: c => ` ${c.label}: ${c.raw.toFixed(1)} Horas` } } }
+        }
       });
 
-      let labels = Object.keys(areaCusto);
-      let values = labels.map(a => {
-        let custoTotal = areaCusto[a];
-        let hcMax = areaHC[a] || 1;
-        let numMeses = areaMeses[a].size || 1;
-        return (custoTotal / (numMeses * hcMax));
-      });
+      // Chart 4: Áreas Ofensoras
+      let areaCustoMap = {};
+      filteredData.forEach(d => { areaCustoMap[d.area] = (areaCustoMap[d.area] || 0) + d.valor; });
+      let sortedAreas = Object.keys(areaCustoMap).sort((a,b) => areaCustoMap[b] - areaCustoMap[a]);
 
-      const ctx = document.getElementById('chartHCEficiencia').getContext('2d');
-      chartInstances.hcEficiencia = new Chart(ctx, {
+      const ctxOfens = document.getElementById('chartAreasOfensoras').getContext('2d');
+      chartInstances.ofensoras = new Chart(ctxOfens, {
         type: 'bar',
         data: {
-          labels: labels,
+          labels: sortedAreas.map(a => `Área ${a}`),
+          datasets: [{
+            label: 'Custo Total',
+            data: sortedAreas.map(a => areaCustoMap[a]),
+            backgroundColor: '#00a9e0',
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` Custo: ${fmtR$(c.raw)}` } } },
+          scales: { y: { ticks: { callback: v => 'R$ ' + (v/1000).toFixed(0) + 'k' } } }
+        }
+      });
+
+      // Chart 5: Custo Médio R$/HC/Mês por Área
+      let areaHCMap = {};
+      let areaMesesSet = {};
+      filteredData.forEach(d => {
+        areaHCMap[d.area] = Math.max(areaHCMap[d.area] || 0, d.hc);
+        if (!areaMesesSet[d.area]) areaMesesSet[d.area] = new Set();
+        areaMesesSet[d.area].add(d.mesAno);
+      });
+
+      let hcValues = sortedAreas.map(a => {
+        let custo = areaCustoMap[a];
+        let maxHC = areaHCMap[a] || 1;
+        let nMeses = areaMesesSet[a].size || 1;
+        return custo / (nMeses * maxHC);
+      });
+
+      const ctxEf = document.getElementById('chartHCEficiencia').getContext('2d');
+      chartInstances.eficiencia = new Chart(ctxEf, {
+        type: 'bar',
+        data: {
+          labels: sortedAreas.map(a => `Área ${a}`),
           datasets: [{
             label: 'R$ / HC / Mês',
-            data: values,
+            data: hcValues,
             backgroundColor: '#8b5cf6',
             borderRadius: 6
           }]
@@ -774,78 +647,8 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          indexAxis: 'y',
-          plugins: {
-            legend: { display: false },
-            tooltip: { callbacks: { label: c => ` Média: ${fmtR$(c.raw)} / HC / Mês` } }
-          },
-          scales: {
-            x: { ticks: { callback: v => 'R$ ' + v.toFixed(0) } }
-          }
-        }
-      });
-    }
-
-    // Chart 5: Distribuição de Modalidade de Horas
-    function renderChartModalidade() {
-      let modMap = {};
-      filteredData.forEach(d => {
-        modMap[d.modalidade] = (modMap[d.modalidade] || 0) + d.custo;
-      });
-
-      const ctx = document.getElementById('chartModalidade').getContext('2d');
-      chartInstances.modalidade = new Chart(ctx, {
-        type: 'pie',
-        data: {
-          labels: Object.keys(modMap),
-          datasets: [{
-            data: Object.values(modMap),
-            backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6']
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } },
-            tooltip: { callbacks: { label: c => ` ${c.label}: ${fmtR$(c.raw)}` } }
-          }
-        }
-      });
-    }
-
-    // Chart 6: Regiões Ofensoras
-    function renderChartRegioesOfensoras() {
-      let regMap = {};
-      filteredData.forEach(d => {
-        regMap[d.regiao] = (regMap[d.regiao] || 0) + d.custo;
-      });
-
-      let sortedRegs = Object.keys(regMap).sort((a, b) => regMap[b] - regMap[a]).slice(0, 5);
-      let values = sortedRegs.map(r => regMap[r]);
-
-      const ctx = document.getElementById('chartRegioesOfensoras').getContext('2d');
-      chartInstances.regioes = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: sortedRegs,
-          datasets: [{
-            label: 'Custo de Horas Extras',
-            data: values,
-            backgroundColor: '#f43f5e',
-            borderRadius: 6
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            tooltip: { callbacks: { label: c => ` Custo: ${fmtR$(c.raw)}` } }
-          },
-          scales: {
-            y: { ticks: { callback: v => 'R$ ' + (v/1000).toFixed(0) + 'k' } }
-          }
+          plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` Eficiência: ${fmtR$(c.raw)} / HC / Mês` } } },
+          scales: { y: { ticks: { callback: v => 'R$ ' + v.toFixed(0) } } }
         }
       });
     }
@@ -855,34 +658,30 @@
       const tbody = document.getElementById('table-body');
       const search = (document.getElementById('table-search').value || '').toLowerCase();
 
-      let items = filteredData.filter(d => {
-        return d.mesAno.toLowerCase().includes(search) ||
-               d.area.toLowerCase().includes(search) ||
-               d.regiao.toLowerCase().includes(search) ||
-               d.categoria.toLowerCase().includes(search) ||
-               d.modalidade.toLowerCase().includes(search);
-      }).slice(0, 50); // Limite de linhas para alta performance
+      let filtered = filteredData.filter(d => {
+        return d.area.toLowerCase().includes(search) ||
+               d.mesAno.toLowerCase().includes(search) ||
+               d.periodo.toLowerCase().includes(search);
+      });
 
-      if (items.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-400">Nenhum registro encontrado para os filtros selecionados.</td></tr>`;
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" class="p-4 text-center text-slate-400">Nenhum registro encontrado.</td></tr>`;
         return;
       }
 
-      tbody.innerHTML = items.map(d => `
+      tbody.innerHTML = filtered.map(d => `
         <tr class="hover:bg-slate-50 transition">
-          <td class="p-3 font-semibold text-slate-900">${d.mesAno}</td>
-          <td class="p-3">${d.area}</td>
-          <td class="p-3"><span class="px-2 py-0.5 bg-slate-100 rounded border border-slate-200">${d.regiao}</span></td>
-          <td class="p-3">${d.categoria}</td>
-          <td class="p-3"><span class="px-2 py-0.5 bg-sky-50 text-sky-700 rounded border border-sky-200 text-[10px] font-bold">${d.modalidade}</span></td>
-          <td class="p-3 text-right font-medium">${d.horas}h</td>
-          <td class="p-3 text-right font-bold text-slate-900">${fmtR$(d.custo)}</td>
+          <td class="p-3 font-bold text-slate-900">${d.mesAno}</td>
+          <td class="p-3 text-slate-500 text-[11px]">${d.periodo}</td>
+          <td class="p-3 font-semibold"><span class="px-2 py-0.5 bg-slate-100 rounded border border-slate-200">Área ${d.area}</span></td>
+          <td class="p-3 text-center font-bold">${d.hc}</td>
+          <td class="p-3 text-right">${d.h50.toFixed(1)}h</td>
+          <td class="p-3 text-right">${d.h100.toFixed(1)}h</td>
+          <td class="p-3 text-right">${d.sob.toFixed(1)}h</td>
+          <td class="p-3 text-right">${d.not.toFixed(1)}h</td>
+          <td class="p-3 text-right font-bold text-slate-900">${fmtR$(d.valor)}</td>
         </tr>
       `).join('');
-    }
-
-    function filterTable() {
-      renderTable();
     }
   </script>
 </body>
