@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Chart.js Plugin Datalabels (para exibir porcentagens diretamente nos gráficos) -->
+  <!-- Chart.js Plugin Datalabels -->
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
   <!-- PapaParse CDN para Leitura do Google Sheets CSV -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
@@ -133,53 +133,69 @@
         </div>
       </section>
 
-      <!-- Cards de KPIs Principais -->
-      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <!-- Cards de KPIs Principais (Ajustado para 6 colunas) -->
+      <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        
+        <!-- Card 1: Custo Total -->
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
           <div class="flex items-center justify-between text-slate-500 text-xs font-semibold">
             <span>CUSTO TOTAL</span>
             <i class="fa-solid fa-sack-dollar text-emerald-500 text-sm"></i>
           </div>
-          <p id="kpi-custo-total" class="text-xl font-extrabold text-slate-900">R$ 0,00</p>
+          <p id="kpi-custo-total" class="text-lg font-extrabold text-slate-900">R$ 0,00</p>
           <p class="text-[11px] text-slate-500 font-medium">Acumulado do Período</p>
         </div>
 
+        <!-- Card 2: Média Mensal -->
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
           <div class="flex items-center justify-between text-slate-500 text-xs font-semibold">
             <span>MÉDIA MENSAL</span>
             <i class="fa-solid fa-chart-line text-sky-500 text-sm"></i>
           </div>
-          <p id="kpi-media-mensal" class="text-xl font-extrabold text-slate-900">R$ 0,00</p>
+          <p id="kpi-media-mensal" class="text-lg font-extrabold text-slate-900">R$ 0,00</p>
           <p class="text-[11px] text-slate-500 font-medium">Custo Médio por Mês</p>
         </div>
 
+        <!-- Card 3: Mês de Pico -->
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
           <div class="flex items-center justify-between text-slate-500 text-xs font-semibold">
             <span>MÊS DE PICO</span>
             <i class="fa-solid fa-arrow-trend-up text-rose-500 text-sm"></i>
           </div>
-          <p id="kpi-mes-pico" class="text-xl font-extrabold text-rose-600">--</p>
+          <p id="kpi-mes-pico" class="text-lg font-extrabold text-rose-600">--</p>
           <p id="kpi-pico-valor" class="text-[11px] text-slate-500 font-medium">R$ 0,00</p>
         </div>
 
+        <!-- NOVO Card 4: COMPARATIVO ÚLTIMO MÊS -->
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
+          <div class="flex items-center justify-between text-slate-500 text-xs font-semibold">
+            <span>COMP. ÚLTIMO MÊS</span>
+            <i id="kpi-comp-icon" class="fa-solid fa-arrow-right-arrow-left text-slate-400 text-sm"></i>
+          </div>
+          <p id="kpi-comp-valor" class="text-lg font-extrabold text-slate-900">R$ 0,00</p>
+          <p id="kpi-comp-sub" class="text-[11px] font-semibold text-slate-500">Vs. Mês Anterior</p>
+        </div>
+
+        <!-- Card 5: Custo / HC / Mês -->
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
           <div class="flex items-center justify-between text-slate-500 text-xs font-semibold">
             <span>CUSTO / HC / MÊS</span>
             <i class="fa-solid fa-user-gear text-purple-500 text-sm"></i>
           </div>
-          <p id="kpi-hc-custo" class="text-xl font-extrabold text-slate-900">R$ 0,00</p>
+          <p id="kpi-hc-custo" class="text-lg font-extrabold text-slate-900">R$ 0,00</p>
           <p class="text-[11px] text-slate-500 font-medium">Eficiência p/ Colaborador</p>
         </div>
 
-        <!-- KPI HEADCOUNT ATUALIZADO (ÚLTIMO MÊS FECHADO) -->
+        <!-- Card 6: Headcount Atual -->
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
           <div class="flex items-center justify-between text-slate-500 text-xs font-semibold">
             <span>HEADCOUNT ATUAL</span>
             <i class="fa-solid fa-users text-amber-500 text-sm"></i>
           </div>
-          <p id="kpi-hc-total" class="text-xl font-extrabold text-slate-900">0 HC</p>
+          <p id="kpi-hc-total" class="text-lg font-extrabold text-slate-900">0 HC</p>
           <p id="kpi-hc-sub" class="text-[11px] text-slate-500 font-medium">Último Fechamento</p>
         </div>
+
       </section>
 
       <!-- Linha de Gráficos 1: Evolução Temporal + Mês Atual por Área -->
@@ -240,9 +256,8 @@
         </div>
       </section>
 
-      <!-- Linha de Gráficos 3: Custo Médio por Colaborador + NOVO GRÁFICO DE EVOLUÇÃO MENSAL DE HEADCOUNT -->
+      <!-- Linha de Gráficos 3: Custo Médio por Colaborador + Evolução Mensal do Headcount -->
       <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Custo Médio por HC -->
         <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
           <div class="flex items-center justify-between border-b pb-3">
             <div>
@@ -256,7 +271,6 @@
           </div>
         </div>
 
-        <!-- NOVO: Evolução Mensal do Headcount -->
         <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
           <div class="flex items-center justify-between border-b pb-3">
             <div>
@@ -314,7 +328,6 @@
 
   <!-- ================= LÓGICA JAVASCRIPT ================= -->
   <script>
-    // Registrar o plugin de datalabels no Chart.js
     Chart.register(ChartDataLabels);
 
     const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQZQ1H_MHtywA4MhrFlGkuLCL0lNQmwwjVDObrj2iryoxNlLdat0pwQFJyDDY6WImYbLDwauF_41E_k/pub?gid=135833026&single=true&output=csv';
@@ -323,7 +336,6 @@
     let filteredData = [];
     let chartInstances = {};
 
-    // 1. LOGIN
     function handleLogin(event) {
       event.preventDefault();
       const user = document.getElementById('login-user').value;
@@ -349,7 +361,6 @@
       document.getElementById('login-screen').classList.remove('opacity-0');
     }
 
-    // Convertor HH:MM:SS para horas decimais
     function timeToHours(timeStr) {
       if (!timeStr) return 0;
       let parts = timeStr.toString().trim().split(':');
@@ -360,7 +371,6 @@
       return h + (m / 60) + (s / 3600);
     }
 
-    // Convertor Monetário R$
     function parseCurrency(val) {
       if (!val) return 0;
       if (typeof val === 'number') return val;
@@ -368,7 +378,6 @@
       return parseFloat(clean) || 0;
     }
 
-    // 2. CARREGAMENTO DOS DADOS CSV
     function loadGoogleSheetData() {
       const syncIcon = document.getElementById('sync-icon');
       if (syncIcon) syncIcon.classList.add('fa-spin');
@@ -392,7 +401,6 @@
       });
     }
 
-    // Processador de dados
     function processParsedData(data) {
       rawData = data.map((row, idx) => {
         const ano = row['ANO'] || row['Ano'] || '2024';
@@ -431,15 +439,12 @@
       const sample = [
         { ANO: '2024', MÊS: 'jan', 'PERÍODO FECHAMENTO': '15/12/2023 - 14/01/2024', ÁREAS: '12', HC: '60', 'HORAS 50%': '451:03:00', 'HORAS 100%': '698:38:00', SOBREAVISO: '2925:18:00', 'AD.NOTURNO': '1156:48:00', 'VALOR TOTAL $': 'R$ 72.939,85' },
         { ANO: '2024', MÊS: 'jan', 'PERÍODO FECHAMENTO': '15/12/2023 - 14/01/2024', ÁREAS: '14', HC: '64', 'HORAS 50%': '762:13:00', 'HORAS 100%': '415:58:00', SOBREAVISO: '4594:36:00', 'AD.NOTURNO': '678:02:00', 'VALOR TOTAL $': 'R$ 74.370,53' },
-        { ANO: '2024', MÊS: 'set', 'PERÍODO FECHAMENTO': '15/08/2024 - 14/09/2024', ÁREAS: '19-CAS', HC: '67', 'HORAS 50%': '749:58:00', 'HORAS 100%': '661:00:00', SOBREAVISO: '4150:52:00', 'AD.NOTURNO': '762:56:00', 'VALOR TOTAL $': 'R$ 76.851,65' },
-        { ANO: '2024', MÊS: 'set', 'PERÍODO FECHAMENTO': '15/08/2024 - 14/09/2024', ÁREAS: '16', HC: '66', 'HORAS 50%': '867:26:00', 'HORAS 100%': '589:26:00', SOBREAVISO: '3388:46:00', 'AD.NOTURNO': '697:57:00', 'VALOR TOTAL $': 'R$ 75.269,30' },
-        { ANO: '2024', MÊS: 'set', 'PERÍODO FECHAMENTO': '15/08/2024 - 14/09/2024', ÁREAS: '14', HC: '64', 'HORAS 50%': '854:10:00', 'HORAS 100%': '380:29:00', SOBREAVISO: '4641:19:00', 'AD.NOTURNO': '921:39:00', 'VALOR TOTAL $': 'R$ 72.486,50' },
-        { ANO: '2024', MÊS: 'set', 'PERÍODO FECHAMENTO': '15/08/2024 - 14/09/2024', ÁREAS: '19-PAA', HC: '63', 'HORAS 50%': '773:44:00', 'HORAS 100%': '398:57:00', SOBREAVISO: '4690:42:00', 'AD.NOTURNO': '532:25:00', 'VALOR TOTAL $': 'R$ 58.485,41' }
+        { ANO: '2024', MÊS: 'ago', 'PERÍODO FECHAMENTO': '15/07/2024 - 14/08/2024', ÁREAS: '14', HC: '64', 'HORAS 50%': '793:44:00', 'HORAS 100%': '244:12:00', SOBREAVISO: '4601:52:00', 'AD.NOTURNO': '700:48:50', 'VALOR TOTAL $': 'R$ 64.051,35' },
+        { ANO: '2024', MÊS: 'set', 'PERÍODO FECHAMENTO': '15/08/2024 - 14/09/2024', ÁREAS: '19-CAS', HC: '67', 'HORAS 50%': '749:58:00', 'HORAS 100%': '661:00:00', SOBREAVISO: '4150:52:00', 'AD.NOTURNO': '762:56:00', 'VALOR TOTAL $': 'R$ 76.851,65' }
       ];
       processParsedData(sample);
     }
 
-    // 3. POPULAR SELETORES
     function populateSelectOptions() {
       const anoSelect = document.getElementById('filter-ano');
       const anos = [...new Set(rawData.map(d => d.ano))].sort((a,b) => b - a);
@@ -450,7 +455,6 @@
       areaSelect.innerHTML = '<option value="ALL" selected>Todas as Áreas</option>' + areas.map(a => `<option value="${a}">Área ${a}</option>`).join('');
     }
 
-    // 4. FILTROS
     function applyFilters() {
       const selectedAno = document.getElementById('filter-ano').value;
       const selectedArea = document.getElementById('filter-area').value;
@@ -479,10 +483,20 @@
     // 5. CÁLCULO E RENDERIZAÇÃO DE KPIS
     function renderKPIs() {
       const totalCusto = filteredData.reduce((acc, d) => acc + d.valor, 0);
-      const mesesUnicos = [...new Set(filteredData.map(d => d.mesAno))];
-      const numMeses = mesesUnicos.length || 1;
+      const ordemMeses = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+
+      // Mapear meses ordenados cronologicamente
+      let listaMesesAno = [...new Set(filteredData.map(d => d.mesAno))].sort((a,b) => {
+        let [mA, aA] = a.split('/');
+        let [mB, aB] = b.split('/');
+        if (aA !== aB) return parseInt(aA) - parseInt(aB);
+        return ordemMeses.indexOf(mA.toLowerCase()) - ordemMeses.indexOf(mB.toLowerCase());
+      });
+
+      const numMeses = listaMesesAno.length || 1;
       const mediaMensal = totalCusto / numMeses;
 
+      // Pico
       let custoPorMes = {};
       filteredData.forEach(d => {
         custoPorMes[d.mesAno] = (custoPorMes[d.mesAno] || 0) + d.valor;
@@ -497,19 +511,52 @@
         }
       });
 
-      // IDENTIFICAR ÚLTIMO MÊS REGISTRADO PARA CÁLCULO DO HEADCOUNT ATUAL
-      const ordemMeses = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
-      let listaMesesAno = [...new Set(filteredData.map(d => d.mesAno))].sort((a,b) => {
-        let [mA, aA] = a.split('/');
-        let [mB, aB] = b.split('/');
-        if (aA !== aB) return parseInt(aA) - parseInt(aB);
-        return ordemMeses.indexOf(mA.toLowerCase()) - ordemMeses.indexOf(mB.toLowerCase());
-      });
+      // --- CÁLCULO DO COMPARATIVO ÚLTIMO MÊS VS MÊS ANTERIOR ---
+      let compValorElem = document.getElementById('kpi-comp-valor');
+      let compSubElem = document.getElementById('kpi-comp-sub');
+      let compIconElem = document.getElementById('kpi-comp-icon');
 
+      if (listaMesesAno.length >= 2) {
+        let ultimoMes = listaMesesAno[listaMesesAno.length - 1];
+        let penultimoMes = listaMesesAno[listaMesesAno.length - 2];
+
+        let valorUltimo = custoPorMes[ultimoMes] || 0;
+        let valorPenultimo = custoPorMes[penultimoMes] || 0;
+
+        let diff = valorUltimo - valorPenultimo;
+        let pct = valorPenultimo > 0 ? ((diff / valorPenultimo) * 100) : 0;
+
+        let diffFmt = fmtR$(Math.abs(diff));
+        let pctFmt = Math.abs(pct).toFixed(1) + '%';
+
+        if (diff > 0) {
+          // Aumento de Custo
+          compValorElem.innerText = `+${pctFmt}`;
+          compValorElem.className = "text-lg font-extrabold text-rose-600";
+          compSubElem.innerHTML = `<span class="text-rose-600 font-bold">▲ +${diffFmt}</span> vs. ${penultimoMes}`;
+          compIconElem.className = "fa-solid fa-arrow-trend-up text-rose-500 text-sm";
+        } else if (diff < 0) {
+          // Redução de Custo
+          compValorElem.innerText = `-${pctFmt}`;
+          compValorElem.className = "text-lg font-extrabold text-emerald-600";
+          compSubElem.innerHTML = `<span class="text-emerald-600 font-bold">▼ -${diffFmt}</span> vs. ${penultimoMes}`;
+          compIconElem.className = "fa-solid fa-arrow-trend-down text-emerald-500 text-sm";
+        } else {
+          compValorElem.innerText = `0.0%`;
+          compValorElem.className = "text-lg font-extrabold text-slate-700";
+          compSubElem.innerText = `Estável vs. ${penultimoMes}`;
+          compIconElem.className = "fa-solid fa-minus text-slate-400 text-sm";
+        }
+      } else {
+        compValorElem.innerText = `--`;
+        compValorElem.className = "text-lg font-extrabold text-slate-400";
+        compSubElem.innerText = `Período Insuficiente`;
+        compIconElem.className = "fa-solid fa-circle-info text-slate-300 text-sm";
+      }
+
+      // Headcount Atual
       let ultimoMesAno = listaMesesAno[listaMesesAno.length - 1] || 'jan/2024';
       let dadosUltimoMes = filteredData.filter(d => d.mesAno === ultimoMesAno);
-      
-      // Soma do HC das áreas no último mês
       let hcAtualTotal = dadosUltimoMes.reduce((acc, curr) => acc + curr.hc, 0);
 
       let hcMedioGeral = Math.round(filteredData.reduce((a, b) => a + b.hc, 0) / (filteredData.length || 1));
@@ -520,8 +567,6 @@
       document.getElementById('kpi-mes-pico').innerText = picoMes;
       document.getElementById('kpi-pico-valor').innerText = `Pico: ${fmtR$(picoValor)}`;
       document.getElementById('kpi-hc-custo').innerText = fmtR$(hcCustoMedio);
-      
-      // EXIBIR HC ATUAL REAL
       document.getElementById('kpi-hc-total').innerText = `${hcAtualTotal} HC`;
       document.getElementById('kpi-hc-sub').innerText = `Mês: ${ultimoMesAno}`;
     }
@@ -571,7 +616,7 @@
         }
       });
 
-      // Chart 2: Mês Atual por Área (Barras com Área Ofensora em Destaque)
+      // Chart 2: Mês Atual por Área
       let ultimosMeses = labelsEvol;
       let ultimoMes = ultimosMeses[ultimosMeses.length - 1] || 'jan/2024';
       let dadosUltimoMes = filteredData.filter(d => `${d.mes}/${d.ano}` === ultimoMes);
@@ -615,7 +660,7 @@
         }
       });
 
-      // Chart 3: Modalidades (Horas) COM PORCENTAGEM EXIBIDA NO GRÁFICO %
+      // Chart 3: Modalidades
       let totH50 = filteredData.reduce((a, b) => a + b.h50, 0);
       let totH100 = filteredData.reduce((a, b) => a + b.h100, 0);
       let totSob = filteredData.reduce((a, b) => a + b.sob, 0);
@@ -642,7 +687,7 @@
               font: { weight: 'bold', size: 11 },
               formatter: (value) => {
                 let pct = ((value / totGeralHoras) * 100).toFixed(1);
-                return pct > 3 ? `${pct}%` : ''; // Mostra rótulo se fatia for maior que 3%
+                return pct > 3 ? `${pct}%` : '';
               }
             },
             tooltip: {
@@ -719,7 +764,7 @@
         }
       });
 
-      // NOVO Chart 6: EVOLUÇÃO MENSAL DO HEADCOUNT
+      // Chart 6: EVOLUÇÃO MENSAL DO HEADCOUNT
       let hcMesMap = {};
       filteredData.forEach(d => {
         let key = `${d.mes}/${d.ano}`;
