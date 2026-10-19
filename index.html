@@ -212,6 +212,213 @@
 
         <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
           <div class="flex items-center justify-between border-b pb-3">
+            <div><!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Portal Fechamento Horas Extras | Vivo SPI</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; }
+    @media print {
+      header, #btn-export-pdf, button, input, select, #login-screen { display: none !important; }
+      body { background-color: #ffffff !important; color: #000000 !important; }
+      #main-portal { display: block !important; }
+      .shadow-sm, .shadow-md, .shadow-lg, .shadow-2xl { box-shadow: none !important; }
+      .border { border-color: #e2e8f0 !important; }
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col antialiased">
+
+  <!-- ================= TELA DE LOGIN ================= -->
+  <div id="login-screen" class="fixed inset-0 bg-[#0b2341] z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl space-y-6 relative overflow-hidden border border-slate-200">
+      
+      <div class="text-center space-y-2">
+        <div class="w-16 h-16 bg-sky-500 text-white rounded-2xl flex items-center justify-center mx-auto shadow-md font-bold text-2xl">
+          🛡️
+        </div>
+        <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">CONTRATO VIVO - SPI</h2>
+        <p class="text-xs text-slate-500 font-medium">Painel Gerencial de Desempenho Operacional</p>
+      </div>
+
+      <form onsubmit="handleLogin(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Usuário</label>
+          <input type="text" id="login-user" required placeholder="Digite seu usuário..." value="admin" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-800 font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Senha</label>
+          <input type="password" id="login-pass" required placeholder="Digite sua senha..." value="admin123" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-800 font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none">
+        </div>
+
+        <button type="submit" id="btn-login" class="w-full py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs rounded-lg shadow-md transition flex items-center justify-center gap-2">
+          <span>Entrar no Portal</span> ➔
+        </button>
+      </form>
+
+      <div class="pt-4 border-t border-slate-100 text-center text-[10px] text-slate-400">
+        Acesso restrito à supervisão e coordenação SPI • Validação ao vivo
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= PORTAL PRINCIPAL ================= -->
+  <div id="main-portal" class="hidden min-h-screen flex-col">
+    
+    <!-- Topbar Header -->
+    <header class="bg-[#0b2341] text-white shadow-lg sticky top-0 z-40">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-sky-500 rounded-xl flex items-center justify-center text-white shadow-inner font-bold">
+            ⏰
+          </div>
+          <div>
+            <h1 class="text-base font-extrabold tracking-wide">PORTAL FECHAMENTO HORAS EXTRAS</h1>
+            <p class="text-[11px] text-sky-200 font-medium">Contrato Vivo SPI • Monitoramento e Custos Operacionais</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button id="btn-export-pdf" onclick="window.print()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-lg shadow transition flex items-center gap-2">
+            📄 Exportar PDF
+          </button>
+
+          <button onclick="loadGoogleSheetData()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-semibold rounded-lg border border-slate-600 transition flex items-center gap-2">
+            🔄 <span>Sincronizar Planilha</span>
+          </button>
+
+          <div class="h-6 w-px bg-slate-700"></div>
+
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-full bg-sky-600 flex items-center justify-center font-bold text-xs">
+              SPI
+            </div>
+            <div class="hidden sm:block text-left text-xs">
+              <p class="font-bold leading-tight">Supervisão SPI</p>
+              <p class="text-[10px] text-slate-300">Sessão Ativa</p>
+            </div>
+          </div>
+
+          <button onclick="handleLogout()" title="Sair do Portal" class="text-slate-300 hover:text-rose-400 p-2 text-sm transition">
+            🚪
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Área Principal de Conteúdo -->
+    <div id="printable-dashboard" class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+      <!-- BARRA DE FILTROS COMPLETA -->
+      <section class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-2 text-xs font-semibold text-slate-600">
+          🔍 <span>Filtros do Painel:</span>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3">
+          <select id="filter-ano" onchange="applyFilters()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none">
+            <option value="ALL">Todos os Anos</option>
+          </select>
+
+          <select id="filter-mes" onchange="applyFilters()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none">
+            <option value="ALL">Todos os Meses</option>
+          </select>
+
+          <select id="filter-ddd" onchange="applyFilters()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none">
+            <option value="ALL">Todos os DDDs</option>
+          </select>
+
+          <select id="filter-area" onchange="applyFilters()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none">
+            <option value="ALL">Todas as Áreas</option>
+          </select>
+
+          <button onclick="resetFilters()" class="text-xs text-slate-500 hover:text-sky-600 font-semibold underline px-2">
+            Limpar Filtros
+          </button>
+        </div>
+      </section>
+
+      <!-- Cards de KPIs Principais -->
+      <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
+          <div class="flex items-center justify-between text-slate-500 text-xs font-semibold">
+            <span>CUSTO TOTAL</span> 💰
+          </div>
+          <p id="kpi-custo-total" class="text-lg font-extrabold text-slate-900">R$ 0,00</p>
+          <p class="text-[11px] text-slate-500 font-medium">Acumulado do Período</p>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
+          <div class="flex items-center justify-between text-slate-500 text-xs font-semibold">
+            <span>MÉDIA MENSAL</span> 📈
+          </div>
+          <p id="kpi-media-mensal" class="text-lg font-extrabold text-slate-900">R$ 0,00</p>
+          <p class="text-[11px] text-slate-500 font-medium">Custo Médio por Mês</p>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
+          <div class="flex items-center justify-between text-slate-500 text-xs font-semibold">
+            <span>MÊS DE PICO</span> 🚨
+          </div>
+          <p id="kpi-mes-pico" class="text-lg font-extrabold text-rose-600">--</p>
+          <p id="kpi-pico-valor" class="text-[11px] text-slate-500 font-medium">R$ 0,00</p>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
+          <div class="flex items-center justify-between text-slate-500 text-xs font-semibold">
+            <span>COMP. ÚLTIMO MÊS</span> 🔄
+          </div>
+          <p id="kpi-comp-valor" class="text-lg font-extrabold text-slate-900">0.0%</p>
+          <p id="kpi-comp-sub" class="text-[11px] font-semibold text-slate-500">Vs. Mês Anterior</p>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
+          <div class="flex items-center justify-between text-slate-500 text-xs font-semibold">
+            <span>CUSTO / HC / MÊS</span> ⚙️
+          </div>
+          <p id="kpi-hc-custo" class="text-lg font-extrabold text-slate-900">R$ 0,00</p>
+          <p class="text-[11px] text-slate-500 font-medium">Eficiência p/ Colaborador</p>
+        </div>
+
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
+          <div class="flex items-center justify-between text-slate-500 text-xs font-semibold">
+            <span>HEADCOUNT ATUAL</span> 👥
+          </div>
+          <p id="kpi-hc-total" class="text-lg font-extrabold text-slate-900">0 HC</p>
+          <p id="kpi-hc-sub" class="text-[11px] text-slate-500 font-medium">Último Fechamento</p>
+        </div>
+
+      </section>
+
+      <!-- Linha 1: Evolução Temporal + Mês Atual por Área -->
+      <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+          <div class="flex items-center justify-between border-b pb-3">
+            <div>
+              <h2 class="text-sm font-bold text-slate-900">Evolução do Custo Mensal (R$)</h2>
+              <p class="text-xs text-slate-500">Histórico de custos mensais acumulados da operação</p>
+            </div>
+            <span class="px-2.5 py-1 bg-sky-50 text-sky-700 text-[10px] font-bold rounded-full uppercase border border-sky-200">Histórico Completo</span>
+          </div>
+          <div class="relative h-72">
+            <canvas id="chartEvolucaoMensal"></canvas>
+          </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+          <div class="flex items-center justify-between border-b pb-3">
             <div>
               <h2 class="text-sm font-bold text-slate-900">Mês Atual por Área</h2>
               <p class="text-xs text-slate-500">Ranking do último mês com área ofensora no topo</p>
@@ -362,8 +569,7 @@
       if (parts.length < 2) return parseFloat(timeStr) || 0;
       let h = parseInt(parts[0], 10) || 0;
       let m = parseInt(parts[1], 10) || 0;
-      let s = parts[2] ? parseInt(parts[2], 10) || 0 : 0;
-      return h + (m / 60) + (s / 3600);
+      return h + (m / 60);
     }
 
     function parseCurrency(val) {
@@ -581,7 +787,7 @@
         data: {
           labels: labelsEvol,
           datasets: [{
-            label: 'Custo Total (R$)',
+            label: 'Custo Total',
             data: labelsEvol.map(l => mesMap[l]),
             borderColor: '#00a9e0',
             backgroundColor: 'rgba(0, 169, 224, 0.1)',
@@ -610,7 +816,7 @@
         data: {
           labels: sortedAreasUltimoMes.map(a => `Área ${a}`),
           datasets: [{
-            label: 'Custo no Mês',
+            label: 'Custo',
             data: valoresUltimoMes,
             backgroundColor: bgColorsMes,
             borderRadius: 6
