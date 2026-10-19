@@ -119,8 +119,6 @@
         <div class="flex flex-wrap items-center gap-3">
           <select id="filter-ano" onchange="applyFilters()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none">
             <option value="ALL">Todos os Anos</option>
-            <option value="2024" selected>2024</option>
-            <option value="2025">2025</option>
           </select>
 
           <select id="filter-area" onchange="applyFilters()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none">
@@ -189,7 +187,7 @@
               <h2 class="text-sm font-bold text-slate-900">Evolução do Custo Mensal (R$)</h2>
               <p class="text-xs text-slate-500">Histórico de custos mensais acumulados da operação</p>
             </div>
-            <span class="px-2.5 py-1 bg-sky-50 text-sky-700 text-[10px] font-bold rounded-full uppercase border border-sky-200">2024 - Mês Atual</span>
+            <span class="px-2.5 py-1 bg-sky-50 text-sky-700 text-[10px] font-bold rounded-full uppercase border border-sky-200">Histórico Completo</span>
           </div>
           <div class="relative h-72">
             <canvas id="chartEvolucaoMensal"></canvas>
@@ -400,7 +398,7 @@
           not: not,
           valor: valor
         };
-      }).filter(item => item.area !== '' && item.area.toUpperCase() !== 'TOTAL'); // Ignorar linhas agregadas "TOTAL"
+      }).filter(item => item.area !== '' && item.area.toUpperCase() !== 'TOTAL'); // Ignorar linhas "TOTAL"
 
       populateSelectOptions();
       applyFilters();
@@ -411,31 +409,24 @@
       const sample = [
         { ANO: '2024', MÊS: 'jan', 'PERÍODO FECHAMENTO': '15/12/2023 - 14/01/2024', ÁREAS: '12', HC: '60', 'HORAS 50%': '451:03:00', 'HORAS 100%': '698:38:00', SOBREAVISO: '2925:18:00', 'AD.NOTURNO': '1156:48:00', 'VALOR TOTAL $': 'R$ 72.939,85' },
         { ANO: '2024', MÊS: 'jan', 'PERÍODO FECHAMENTO': '15/12/2023 - 14/01/2024', ÁREAS: '14', HC: '64', 'HORAS 50%': '762:13:00', 'HORAS 100%': '415:58:00', SOBREAVISO: '4594:36:00', 'AD.NOTURNO': '678:02:00', 'VALOR TOTAL $': 'R$ 74.370,53' },
-        { ANO: '2024', MÊS: 'jan', 'PERÍODO FECHAMENTO': '15/12/2023 - 14/01/2024', ÁREAS: '15', HC: '51', 'HORAS 50%': '642:45:00', 'HORAS 100%': '570:10:00', SOBREAVISO: '2381:36:00', 'AD.NOTURNO': '975:34:00', 'VALOR TOTAL $': 'R$ 63.399,91' },
-        { ANO: '2024', MÊS: 'jan', 'PERÍODO FECHAMENTO': '15/12/2023 - 14/01/2024', ÁREAS: '16', HC: '65', 'HORAS 50%': '591:47:00', 'HORAS 100%': '478:11:00', SOBREAVISO: '3986:49:00', 'AD.NOTURNO': '623:39:00', 'VALOR TOTAL $': 'R$ 72.626,65' },
-        { ANO: '2024', MÊS: 'jan', 'PERÍODO FECHAMENTO': '15/12/2023 - 14/01/2024', ÁREAS: '17', HC: '45', 'HORAS 50%': '268:46:00', 'HORAS 100%': '182:10:00', SOBREAVISO: '3675:08:00', 'AD.NOTURNO': '594:00:00', 'VALOR TOTAL $': 'R$ 45.605,22' },
-        { ANO: '2024', MÊS: 'jan', 'PERÍODO FECHAMENTO': '15/12/2023 - 14/01/2024', ÁREAS: '18', HC: '38', 'HORAS 50%': '301:29:00', 'HORAS 100%': '283:53:00', SOBREAVISO: '2813:22:00', 'AD.NOTURNO': '457:14:00', 'VALOR TOTAL $': 'R$ 44.767,81' },
-        { ANO: '2024', MÊS: 'jan', 'PERÍODO FECHAMENTO': '15/12/2023 - 14/01/2024', ÁREAS: '19-CAS', HC: '68', 'HORAS 50%': '588:48:00', 'HORAS 100%': '525:23:00', SOBREAVISO: '3840:37:00', 'AD.NOTURNO': '859:49:00', 'VALOR TOTAL $': 'R$ 75.957,08' },
-        { ANO: '2024', MÊS: 'jan', 'PERÍODO FECHAMENTO': '15/12/2023 - 14/01/2024', ÁREAS: '19-PAA', HC: '60', 'HORAS 50%': '662:52:56', 'HORAS 100%': '393:27:58', SOBREAVISO: '5085:11:03', 'AD.NOTURNO': '527:46:57', 'VALOR TOTAL $': 'R$ 64.401,75' },
-        { ANO: '2024', MÊS: 'jan', 'PERÍODO FECHAMENTO': '15/12/2023 - 14/01/2024', ÁREAS: 'CRISE', HC: '15', 'HORAS 50%': '6:29:00', 'HORAS 100%': '35:59:00', SOBREAVISO: '906:34:00', 'AD.NOTURNO': '254:24:00', 'VALOR TOTAL $': 'R$ 15.469,13' },
-        { ANO: '2024', MÊS: 'fev', 'PERÍODO FECHAMENTO': '15/01/2024 - 14/02/2024', ÁREAS: '12', HC: '62', 'HORAS 50%': '634:03:00', 'HORAS 100%': '434:05:00', SOBREAVISO: '2227:09:00', 'AD.NOTURNO': '1214:05:00', 'VALOR TOTAL $': 'R$ 55.888,32' },
-        { ANO: '2024', MÊS: 'fev', 'PERÍODO FECHAMENTO': '15/01/2024 - 14/02/2024', ÁREAS: '14', HC: '66', 'HORAS 50%': '962:58:00', 'HORAS 100%': '324:20:00', SOBREAVISO: '4469:50:00', 'AD.NOTURNO': '869:40:00', 'VALOR TOTAL $': 'R$ 70.051,25' },
-        { ANO: '2024', MÊS: 'mar', 'PERÍODO FECHAMENTO': '15/02/2024 - 14/03/2024', ÁREAS: '12', HC: '62', 'HORAS 50%': '549:02:00', 'HORAS 100%': '383:46:00', SOBREAVISO: '1868:26:00', 'AD.NOTURNO': '1065:14:00', 'VALOR TOTAL $': 'R$ 48.865,06' },
-        { ANO: '2024', MÊS: 'abr', 'PERÍODO FECHAMENTO': '15/03/2024 - 14/04/2024', ÁREAS: '16', HC: '65', 'HORAS 50%': '569:38:00', 'HORAS 100%': '417:55:00', SOBREAVISO: '3994:10:59', 'AD.NOTURNO': '597:52:00', 'VALOR TOTAL $': 'R$ 63.174,41' },
-        { ANO: '2024', MÊS: 'mai', 'PERÍODO FECHAMENTO': '15/04/2024 - 14/05/2024', ÁREAS: '16', HC: '65', 'HORAS 50%': '701:27:00', 'HORAS 100%': '420:38:00', SOBREAVISO: '3720:06:00', 'AD.NOTURNO': '506:29:00', 'VALOR TOTAL $': 'R$ 66.373,99' },
-        { ANO: '2024', MÊS: 'jun', 'PERÍODO FECHAMENTO': '15/05/2024 - 14/06/2024', ÁREAS: '19-CAS', HC: '65', 'HORAS 50%': '584:45:00', 'HORAS 100%': '539:34:00', SOBREAVISO: '3265:30:00', 'AD.NOTURNO': '866:18:00', 'VALOR TOTAL $': 'R$ 64.803,31' },
-        { ANO: '2024', MÊS: 'jul', 'PERÍODO FECHAMENTO': '15/06/2024 - 14/07/2024', ÁREAS: '16', HC: '67', 'HORAS 50%': '442:03:00', 'HORAS 100%': '555:39:00', SOBREAVISO: '4070:06:00', 'AD.NOTURNO': '547:55:00', 'VALOR TOTAL $': 'R$ 66.350,14' },
-        { ANO: '2024', MÊS: 'ago', 'PERÍODO FECHAMENTO': '15/07/2024 - 14/08/2024', ÁREAS: '14', HC: '64', 'HORAS 50%': '793:44:00', 'HORAS 100%': '244:12:00', SOBREAVISO: '4601:52:00', 'AD.NOTURNO': '700:48:50', 'VALOR TOTAL $': 'R$ 64.051,35' },
-        { ANO: '2024', MÊS: 'set', 'PERÍODO FECHAMENTO': '15/08/2024 - 14/09/2024', ÁREAS: '19-CAS', HC: '67', 'HORAS 50%': '749:58:00', 'HORAS 100%': '661:00:00', SOBREAVISO: '4150:52:00', 'AD.NOTURNO': '762:56:00', 'VALOR TOTAL $': 'R$ 76.851,65' }
+        { ANO: '2024', MÊS: 'set', 'PERÍODO FECHAMENTO': '15/08/2024 - 14/09/2024', ÁREAS: '19-CAS', HC: '67', 'HORAS 50%': '749:58:00', 'HORAS 100%': '661:00:00', SOBREAVISO: '4150:52:00', 'AD.NOTURNO': '762:56:00', 'VALOR TOTAL $': 'R$ 76.851,65' },
+        { ANO: '2026', MÊS: 'jan', 'PERÍODO FECHAMENTO': '15/12/2025 - 14/01/2026', ÁREAS: '12', HC: '65', 'HORAS 50%': '510:00:00', 'HORAS 100%': '420:00:00', SOBREAVISO: '3000:00:00', 'AD.NOTURNO': '900:00:00', 'VALOR TOTAL $': 'R$ 81.200,00' },
+        { ANO: '2026', MÊS: 'fev', 'PERÍODO FECHAMENTO': '15/01/2026 - 14/02/2026', ÁREAS: '14', HC: '68', 'HORAS 50%': '620:00:00', 'HORAS 100%': '350:00:00', SOBREAVISO: '4100:00:00', 'AD.NOTURNO': '850:00:00', 'VALOR TOTAL $': 'R$ 79.500,00' }
       ];
       processParsedData(sample);
     }
 
-    // 3. POPULAR SELETORES
+    // 3. POPULAR SELETORES DINAMICAMENTE
     function populateSelectOptions() {
+      // Anos dinâmicos baseados no CSV
+      const anoSelect = document.getElementById('filter-ano');
+      const anos = [...new Set(rawData.map(d => d.ano))].sort((a,b) => b - a);
+      anoSelect.innerHTML = '<option value="ALL" selected>Todos os Anos</option>' + anos.map(a => `<option value="${a}">Ano ${a}</option>`).join('');
+
+      // Áreas dinâmicas baseadas no CSV
       const areaSelect = document.getElementById('filter-area');
       const areas = [...new Set(rawData.map(d => d.area))].sort();
-      areaSelect.innerHTML = '<option value="ALL">Todas as Áreas</option>' + areas.map(a => `<option value="${a}">Área ${a}</option>`).join('');
+      areaSelect.innerHTML = '<option value="ALL" selected>Todas as Áreas</option>' + areas.map(a => `<option value="${a}">Área ${a}</option>`).join('');
     }
 
     // 4. FILTROS
@@ -455,7 +446,7 @@
     }
 
     function resetFilters() {
-      document.getElementById('filter-ano').value = '2024';
+      document.getElementById('filter-ano').value = 'ALL';
       document.getElementById('filter-area').value = 'ALL';
       applyFilters();
     }
@@ -514,8 +505,8 @@
       let labelsEvol = Object.keys(mesMap).sort((a,b) => {
         let [mA, aA] = a.split('/');
         let [mB, aB] = b.split('/');
-        if (aA !== aB) return aA - aB;
-        return ordemMeses.indexOf(mA) - ordemMeses.indexOf(mB);
+        if (aA !== aB) return parseInt(aA) - parseInt(aB);
+        return ordemMeses.indexOf(mA.toLowerCase()) - ordemMeses.indexOf(mB.toLowerCase());
       });
 
       const ctxEvol = document.getElementById('chartEvolucaoMensal').getContext('2d');
