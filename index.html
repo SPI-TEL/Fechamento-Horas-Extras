@@ -3,7 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Portal de Fechamento de Horas Extras | CONTRATO VIVO - SPI</title>
+  
+  <!-- FORÇAR O NAVEGADOR A NÃO GUARDAR CACHE ANTIGO -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+
+  <title>Portal de Fechamento de Horas Extras | CONTRATO VIVO - SPI v3.0</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -19,7 +25,6 @@
   <style>
     body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
     
-    /* Regras de Impressão e PDF Nativo */
     @media print {
       header, #btn-export-pdf, button, input, select, #login-screen {
         display: none !important;
@@ -36,9 +41,6 @@
       }
       .border {
         border-color: #e2e8f0 !important;
-      }
-      .page-break {
-        page-break-before: always;
       }
     }
   </style>
@@ -107,7 +109,6 @@
         </div>
 
         <div class="flex items-center gap-3">
-          <!-- Botão de Exportação em PDF Leve Nativo -->
           <button id="btn-export-pdf" onclick="window.print()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-lg shadow transition flex items-center gap-2">
             <i class="fa-solid fa-file-pdf"></i>
             <span>Exportar PDF</span>
@@ -140,7 +141,7 @@
     <!-- Área Principal de Conteúdo -->
     <div id="printable-dashboard" class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-      <!-- Bar de Filtros -->
+      <!-- BARRA DE FILTROS COMPLETA (ANO, MÊS, DDD, ÁREA) -->
       <section class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-4">
         <div class="flex items-center gap-2 text-xs font-semibold text-slate-600">
           <i class="fa-solid fa-filter text-sky-600"></i>
@@ -152,10 +153,12 @@
             <option value="ALL">Todos os Anos</option>
           </select>
 
+          <!-- FILTRO MÊS -->
           <select id="filter-mes" onchange="applyFilters()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none">
             <option value="ALL">Todos os Meses</option>
           </select>
 
+          <!-- FILTRO DDD -->
           <select id="filter-ddd" onchange="applyFilters()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none">
             <option value="ALL">Todos os DDDs</option>
           </select>
@@ -273,6 +276,7 @@
           </div>
         </div>
 
+        <!-- GRÁFICO TOP 3 POR MODALIDADE -->
         <div class="lg:col-span-2 bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
           <div class="flex items-center justify-between border-b pb-3">
             <div>
