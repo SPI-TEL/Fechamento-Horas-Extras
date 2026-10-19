@@ -11,6 +11,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Chart.js Plugin Datalabels (para exibir porcentagens diretamente nos gráficos) -->
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
   <!-- PapaParse CDN para Leitura do Google Sheets CSV -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
@@ -169,17 +171,18 @@
           <p class="text-[11px] text-slate-500 font-medium">Eficiência p/ Colaborador</p>
         </div>
 
+        <!-- KPI HEADCOUNT ATUALIZADO (ÚLTIMO MÊS FECHADO) -->
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
           <div class="flex items-center justify-between text-slate-500 text-xs font-semibold">
-            <span>HEADCOUNT (MÉDIO)</span>
+            <span>HEADCOUNT ATUAL</span>
             <i class="fa-solid fa-users text-amber-500 text-sm"></i>
           </div>
           <p id="kpi-hc-total" class="text-xl font-extrabold text-slate-900">0 HC</p>
-          <p class="text-[11px] text-slate-500 font-medium">Média do Período</p>
+          <p id="kpi-hc-sub" class="text-[11px] text-slate-500 font-medium">Último Fechamento</p>
         </div>
       </section>
 
-      <!-- Linha de Gráficos 1: Evolução Temporal + Mês Atual por Área (Barras Destaque Ofensora) -->
+      <!-- Linha de Gráficos 1: Evolução Temporal + Mês Atual por Área -->
       <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2 bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
           <div class="flex items-center justify-between border-b pb-3">
@@ -194,7 +197,6 @@
           </div>
         </div>
 
-        <!-- Mês Atual por Área - Gráfico de Barras com Ofensora em Primeiro e em Destaque -->
         <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
           <div class="flex items-center justify-between border-b pb-3">
             <div>
@@ -209,12 +211,12 @@
         </div>
       </section>
 
-      <!-- Linha de Gráficos 2: Distribuição de Modalidades + Regiões/Áreas Ofensoras -->
+      <!-- Linha de Gráficos 2: Distribuição de Modalidades COM PORCENTAGEM % + Regiões/Áreas Ofensoras -->
       <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
           <div class="flex items-center justify-between border-b pb-3">
             <div>
-              <h2 class="text-sm font-bold text-slate-900">Distribuição por Modalidade (Horas)</h2>
+              <h2 class="text-sm font-bold text-slate-900">Distribuição por Modalidade (%)</h2>
               <p class="text-xs text-slate-500">Proporção total de 50%, 100%, Sobreaviso e Ad. Noturno</p>
             </div>
             <i class="fa-solid fa-pie-chart text-slate-400"></i>
@@ -238,17 +240,34 @@
         </div>
       </section>
 
-      <!-- Linha de Gráficos 3: Custo Médio por Colaborador (R$/HC/Mês) por Área -->
-      <section class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
-        <div class="flex items-center justify-between border-b pb-3">
-          <div>
-            <h2 class="text-sm font-bold text-slate-900">Custo Médio Mensal por Colaborador (R$ / HC / Mês) por Área</h2>
-            <p class="text-xs text-slate-500">Indicador de eficiência operacional de horas extras por Headcount ativo</p>
+      <!-- Linha de Gráficos 3: Custo Médio por Colaborador + NOVO GRÁFICO DE EVOLUÇÃO MENSAL DE HEADCOUNT -->
+      <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Custo Médio por HC -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+          <div class="flex items-center justify-between border-b pb-3">
+            <div>
+              <h2 class="text-sm font-bold text-slate-900">Custo Médio Mensal por Colaborador (R$ / HC / Mês)</h2>
+              <p class="text-xs text-slate-500">Eficiência operacional de horas extras por Headcount</p>
+            </div>
+            <span class="px-2.5 py-1 bg-purple-50 text-purple-700 text-[10px] font-bold rounded-full uppercase border border-purple-200">Eficiência R$/HC</span>
           </div>
-          <span class="px-2.5 py-1 bg-purple-50 text-purple-700 text-[10px] font-bold rounded-full uppercase border border-purple-200">Eficiência R$/HC</span>
+          <div class="relative h-72">
+            <canvas id="chartHCEficiencia"></canvas>
+          </div>
         </div>
-        <div class="relative h-72">
-          <canvas id="chartHCEficiencia"></canvas>
+
+        <!-- NOVO: Evolução Mensal do Headcount -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+          <div class="flex items-center justify-between border-b pb-3">
+            <div>
+              <h2 class="text-sm font-bold text-slate-900">Evolução Mensal do Headcount (HC Total)</h2>
+              <p class="text-xs text-slate-500">Variação do número de colaboradores ativos ao longo do tempo</p>
+            </div>
+            <span class="px-2.5 py-1 bg-amber-50 text-amber-700 text-[10px] font-bold rounded-full uppercase border border-amber-200">Evolução HC</span>
+          </div>
+          <div class="relative h-72">
+            <canvas id="chartEvolucaoHC"></canvas>
+          </div>
         </div>
       </section>
 
@@ -295,6 +314,9 @@
 
   <!-- ================= LÓGICA JAVASCRIPT ================= -->
   <script>
+    // Registrar o plugin de datalabels no Chart.js
+    Chart.register(ChartDataLabels);
+
     const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQZQ1H_MHtywA4MhrFlGkuLCL0lNQmwwjVDObrj2iryoxNlLdat0pwQFJyDDY6WImYbLDwauF_41E_k/pub?gid=135833026&single=true&output=csv';
 
     let rawData = [];
@@ -370,7 +392,7 @@
       });
     }
 
-    // Processador de estrutura exatamente como a planilha fornecida
+    // Processador de dados
     function processParsedData(data) {
       rawData = data.map((row, idx) => {
         const ano = row['ANO'] || row['Ano'] || '2024';
@@ -399,13 +421,12 @@
           not: not,
           valor: valor
         };
-      }).filter(item => item.area !== '' && item.area.toUpperCase() !== 'TOTAL'); // Ignorar linhas "TOTAL"
+      }).filter(item => item.area !== '' && item.area.toUpperCase() !== 'TOTAL');
 
       populateSelectOptions();
       applyFilters();
     }
 
-    // Base demonstrativa
     function loadMockFallbackData() {
       const sample = [
         { ANO: '2024', MÊS: 'jan', 'PERÍODO FECHAMENTO': '15/12/2023 - 14/01/2024', ÁREAS: '12', HC: '60', 'HORAS 50%': '451:03:00', 'HORAS 100%': '698:38:00', SOBREAVISO: '2925:18:00', 'AD.NOTURNO': '1156:48:00', 'VALOR TOTAL $': 'R$ 72.939,85' },
@@ -418,7 +439,7 @@
       processParsedData(sample);
     }
 
-    // 3. POPULAR SELETORES DINAMICAMENTE
+    // 3. POPULAR SELETORES
     function populateSelectOptions() {
       const anoSelect = document.getElementById('filter-ano');
       const anos = [...new Set(rawData.map(d => d.ano))].sort((a,b) => b - a);
@@ -476,15 +497,33 @@
         }
       });
 
-      let hcMedio = Math.round(filteredData.reduce((a, b) => a + b.hc, 0) / (filteredData.length || 1));
-      let hcCustoMedio = totalCusto / (numMeses * (hcMedio || 1));
+      // IDENTIFICAR ÚLTIMO MÊS REGISTRADO PARA CÁLCULO DO HEADCOUNT ATUAL
+      const ordemMeses = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+      let listaMesesAno = [...new Set(filteredData.map(d => d.mesAno))].sort((a,b) => {
+        let [mA, aA] = a.split('/');
+        let [mB, aB] = b.split('/');
+        if (aA !== aB) return parseInt(aA) - parseInt(aB);
+        return ordemMeses.indexOf(mA.toLowerCase()) - ordemMeses.indexOf(mB.toLowerCase());
+      });
+
+      let ultimoMesAno = listaMesesAno[listaMesesAno.length - 1] || 'jan/2024';
+      let dadosUltimoMes = filteredData.filter(d => d.mesAno === ultimoMesAno);
+      
+      // Soma do HC das áreas no último mês
+      let hcAtualTotal = dadosUltimoMes.reduce((acc, curr) => acc + curr.hc, 0);
+
+      let hcMedioGeral = Math.round(filteredData.reduce((a, b) => a + b.hc, 0) / (filteredData.length || 1));
+      let hcCustoMedio = totalCusto / (numMeses * (hcMedioGeral || 1));
 
       document.getElementById('kpi-custo-total').innerText = fmtR$(totalCusto);
       document.getElementById('kpi-media-mensal').innerText = fmtR$(mediaMensal);
       document.getElementById('kpi-mes-pico').innerText = picoMes;
       document.getElementById('kpi-pico-valor').innerText = `Pico: ${fmtR$(picoValor)}`;
       document.getElementById('kpi-hc-custo').innerText = fmtR$(hcCustoMedio);
-      document.getElementById('kpi-hc-total').innerText = `${hcMedio} HC`;
+      
+      // EXIBIR HC ATUAL REAL
+      document.getElementById('kpi-hc-total').innerText = `${hcAtualTotal} HC`;
+      document.getElementById('kpi-hc-sub').innerText = `Mês: ${ultimoMesAno}`;
     }
 
     // 6. RENDERIZAÇÃO DOS GRÁFICOS (CHART.JS)
@@ -493,7 +532,7 @@
 
       const ordemMeses = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
 
-      // Chart 1: Evolução Mensal
+      // Chart 1: Evolução Mensal Custo
       let mesMap = {};
       filteredData.forEach(d => {
         let key = `${d.mes}/${d.ano}`;
@@ -527,12 +566,12 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` Custo: ${fmtR$(c.raw)}` } } },
+          plugins: { datalabels: { display: false }, legend: { display: false }, tooltip: { callbacks: { label: c => ` Custo: ${fmtR$(c.raw)}` } } },
           scales: { y: { ticks: { callback: v => 'R$ ' + (v/1000).toFixed(0) + 'k' } } }
         }
       });
 
-      // Chart 2: Mês Atual por Área (BARRAS HORIZONTAIS COM ÁREA OFENSORA EM PRIMEIRA E EM DESTAQUE)
+      // Chart 2: Mês Atual por Área (Barras com Área Ofensora em Destaque)
       let ultimosMeses = labelsEvol;
       let ultimoMes = ultimosMeses[ultimosMeses.length - 1] || 'jan/2024';
       let dadosUltimoMes = filteredData.filter(d => `${d.mes}/${d.ano}` === ultimoMes);
@@ -540,11 +579,8 @@
       let areaUltimoMes = {};
       dadosUltimoMes.forEach(d => { areaUltimoMes[d.area] = (areaUltimoMes[d.area] || 0) + d.valor; });
 
-      // Ordenar do MAIOR custo para o MENOR custo
       let sortedAreasUltimoMes = Object.keys(areaUltimoMes).sort((a, b) => areaUltimoMes[b] - areaUltimoMes[a]);
       let valoresUltimoMes = sortedAreasUltimoMes.map(a => areaUltimoMes[a]);
-
-      // Criar array de cores destacando a 1ª posição (Área Ofensora) em vermelho/rosa (#f43f5e)
       let bgColorsMes = sortedAreasUltimoMes.map((a, idx) => idx === 0 ? '#f43f5e' : '#38bdf8');
 
       const ctxMes = document.getElementById('chartMesAtualArea').getContext('2d');
@@ -562,8 +598,9 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          indexAxis: 'y', // Barras horizontais para facilitar leitura e destacar o primeiro lugar
+          indexAxis: 'y',
           plugins: {
+            datalabels: { display: false },
             legend: { display: false },
             tooltip: {
               callbacks: {
@@ -574,17 +611,16 @@
               }
             }
           },
-          scales: {
-            x: { ticks: { callback: v => 'R$ ' + (v/1000).toFixed(0) + 'k' } }
-          }
+          scales: { x: { ticks: { callback: v => 'R$ ' + (v/1000).toFixed(0) + 'k' } } }
         }
       });
 
-      // Chart 3: Modalidades (Horas)
+      // Chart 3: Modalidades (Horas) COM PORCENTAGEM EXIBIDA NO GRÁFICO %
       let totH50 = filteredData.reduce((a, b) => a + b.h50, 0);
       let totH100 = filteredData.reduce((a, b) => a + b.h100, 0);
       let totSob = filteredData.reduce((a, b) => a + b.sob, 0);
       let totNot = filteredData.reduce((a, b) => a + b.not, 0);
+      let totGeralHoras = totH50 + totH100 + totSob + totNot || 1;
 
       const ctxMod = document.getElementById('chartModalidade').getContext('2d');
       chartInstances.modalidade = new Chart(ctxMod, {
@@ -599,7 +635,26 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } }, tooltip: { callbacks: { label: c => ` ${c.label}: ${c.raw.toFixed(1)} Horas` } } }
+          plugins: {
+            legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } },
+            datalabels: {
+              color: '#ffffff',
+              font: { weight: 'bold', size: 11 },
+              formatter: (value) => {
+                let pct = ((value / totGeralHoras) * 100).toFixed(1);
+                return pct > 3 ? `${pct}%` : ''; // Mostra rótulo se fatia for maior que 3%
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: c => {
+                  let val = c.raw;
+                  let pct = ((val / totGeralHoras) * 100).toFixed(1);
+                  return ` ${c.label}: ${val.toFixed(1)}h (${pct}%)`;
+                }
+              }
+            }
+          }
         }
       });
 
@@ -623,7 +678,7 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` Custo: ${fmtR$(c.raw)}` } } },
+          plugins: { datalabels: { display: false }, legend: { display: false }, tooltip: { callbacks: { label: c => ` Custo: ${fmtR$(c.raw)}` } } },
           scales: { y: { ticks: { callback: v => 'R$ ' + (v/1000).toFixed(0) + 'k' } } }
         }
       });
@@ -659,8 +714,46 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` Eficiência: ${fmtR$(c.raw)} / HC / Mês` } } },
+          plugins: { datalabels: { display: false }, legend: { display: false }, tooltip: { callbacks: { label: c => ` Eficiência: ${fmtR$(c.raw)} / HC / Mês` } } },
           scales: { y: { ticks: { callback: v => 'R$ ' + v.toFixed(0) } } }
+        }
+      });
+
+      // NOVO Chart 6: EVOLUÇÃO MENSAL DO HEADCOUNT
+      let hcMesMap = {};
+      filteredData.forEach(d => {
+        let key = `${d.mes}/${d.ano}`;
+        hcMesMap[key] = (hcMesMap[key] || 0) + d.hc;
+      });
+
+      const ctxHCEvol = document.getElementById('chartEvolucaoHC').getContext('2d');
+      chartInstances.evolucaoHC = new Chart(ctxHCEvol, {
+        type: 'line',
+        data: {
+          labels: labelsEvol,
+          datasets: [{
+            label: 'Headcount Total',
+            data: labelsEvol.map(l => hcMesMap[l]),
+            borderColor: '#f59e0b',
+            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.3,
+            pointBackgroundColor: '#b45309',
+            pointRadius: 5
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            datalabels: { display: false },
+            legend: { display: false },
+            tooltip: { callbacks: { label: c => ` Total Headcount: ${c.raw} HC` } }
+          },
+          scales: {
+            y: { ticks: { callback: v => v + ' HC' } }
+          }
         }
       });
     }
