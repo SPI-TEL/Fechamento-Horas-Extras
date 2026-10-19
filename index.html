@@ -179,7 +179,7 @@
         </div>
       </section>
 
-      <!-- Linha de Gráficos 1: Evolução Temporal + Acumulado Mês Atual por Área -->
+      <!-- Linha de Gráficos 1: Evolução Temporal + Mês Atual por Área (Barras Destaque Ofensora) -->
       <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2 bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
           <div class="flex items-center justify-between border-b pb-3">
@@ -194,15 +194,16 @@
           </div>
         </div>
 
+        <!-- Mês Atual por Área - Gráfico de Barras com Ofensora em Primeiro e em Destaque -->
         <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
           <div class="flex items-center justify-between border-b pb-3">
             <div>
               <h2 class="text-sm font-bold text-slate-900">Mês Atual por Área</h2>
-              <p class="text-xs text-slate-500">Divisão de custo do último mês fechado</p>
+              <p class="text-xs text-slate-500">Ranking do último mês com área ofensora no topo</p>
             </div>
-            <span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded-full uppercase border border-emerald-200">Último Fechamento</span>
+            <span class="px-2.5 py-1 bg-rose-50 text-rose-700 text-[10px] font-bold rounded-full uppercase border border-rose-200">Último Fechamento</span>
           </div>
-          <div class="relative h-72 flex items-center justify-center">
+          <div class="relative h-72">
             <canvas id="chartMesAtualArea"></canvas>
           </div>
         </div>
@@ -226,8 +227,8 @@
         <div class="lg:col-span-2 bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
           <div class="flex items-center justify-between border-b pb-3">
             <div>
-              <h2 class="text-sm font-bold text-slate-900">Áreas / Regiões Ofensoras (Custo Total)</h2>
-              <p class="text-xs text-slate-500">Ranking das áreas com maior volume financeiro de horas extras</p>
+              <h2 class="text-sm font-bold text-slate-900">Áreas / Regiões Ofensoras (Custo Total Acumulado)</h2>
+              <p class="text-xs text-slate-500">Ranking geral das áreas com maior volume financeiro de horas extras</p>
             </div>
             <span class="px-2.5 py-1 bg-rose-50 text-rose-700 text-[10px] font-bold rounded-full uppercase border border-rose-200">Top Ofensores</span>
           </div>
@@ -404,26 +405,25 @@
       applyFilters();
     }
 
-    // Base demonstrativa exata caso ocorra bloqueio de carregamento
+    // Base demonstrativa
     function loadMockFallbackData() {
       const sample = [
         { ANO: '2024', MÊS: 'jan', 'PERÍODO FECHAMENTO': '15/12/2023 - 14/01/2024', ÁREAS: '12', HC: '60', 'HORAS 50%': '451:03:00', 'HORAS 100%': '698:38:00', SOBREAVISO: '2925:18:00', 'AD.NOTURNO': '1156:48:00', 'VALOR TOTAL $': 'R$ 72.939,85' },
         { ANO: '2024', MÊS: 'jan', 'PERÍODO FECHAMENTO': '15/12/2023 - 14/01/2024', ÁREAS: '14', HC: '64', 'HORAS 50%': '762:13:00', 'HORAS 100%': '415:58:00', SOBREAVISO: '4594:36:00', 'AD.NOTURNO': '678:02:00', 'VALOR TOTAL $': 'R$ 74.370,53' },
         { ANO: '2024', MÊS: 'set', 'PERÍODO FECHAMENTO': '15/08/2024 - 14/09/2024', ÁREAS: '19-CAS', HC: '67', 'HORAS 50%': '749:58:00', 'HORAS 100%': '661:00:00', SOBREAVISO: '4150:52:00', 'AD.NOTURNO': '762:56:00', 'VALOR TOTAL $': 'R$ 76.851,65' },
-        { ANO: '2026', MÊS: 'jan', 'PERÍODO FECHAMENTO': '15/12/2025 - 14/01/2026', ÁREAS: '12', HC: '65', 'HORAS 50%': '510:00:00', 'HORAS 100%': '420:00:00', SOBREAVISO: '3000:00:00', 'AD.NOTURNO': '900:00:00', 'VALOR TOTAL $': 'R$ 81.200,00' },
-        { ANO: '2026', MÊS: 'fev', 'PERÍODO FECHAMENTO': '15/01/2026 - 14/02/2026', ÁREAS: '14', HC: '68', 'HORAS 50%': '620:00:00', 'HORAS 100%': '350:00:00', SOBREAVISO: '4100:00:00', 'AD.NOTURNO': '850:00:00', 'VALOR TOTAL $': 'R$ 79.500,00' }
+        { ANO: '2024', MÊS: 'set', 'PERÍODO FECHAMENTO': '15/08/2024 - 14/09/2024', ÁREAS: '16', HC: '66', 'HORAS 50%': '867:26:00', 'HORAS 100%': '589:26:00', SOBREAVISO: '3388:46:00', 'AD.NOTURNO': '697:57:00', 'VALOR TOTAL $': 'R$ 75.269,30' },
+        { ANO: '2024', MÊS: 'set', 'PERÍODO FECHAMENTO': '15/08/2024 - 14/09/2024', ÁREAS: '14', HC: '64', 'HORAS 50%': '854:10:00', 'HORAS 100%': '380:29:00', SOBREAVISO: '4641:19:00', 'AD.NOTURNO': '921:39:00', 'VALOR TOTAL $': 'R$ 72.486,50' },
+        { ANO: '2024', MÊS: 'set', 'PERÍODO FECHAMENTO': '15/08/2024 - 14/09/2024', ÁREAS: '19-PAA', HC: '63', 'HORAS 50%': '773:44:00', 'HORAS 100%': '398:57:00', SOBREAVISO: '4690:42:00', 'AD.NOTURNO': '532:25:00', 'VALOR TOTAL $': 'R$ 58.485,41' }
       ];
       processParsedData(sample);
     }
 
     // 3. POPULAR SELETORES DINAMICAMENTE
     function populateSelectOptions() {
-      // Anos dinâmicos baseados no CSV
       const anoSelect = document.getElementById('filter-ano');
       const anos = [...new Set(rawData.map(d => d.ano))].sort((a,b) => b - a);
       anoSelect.innerHTML = '<option value="ALL" selected>Todos os Anos</option>' + anos.map(a => `<option value="${a}">Ano ${a}</option>`).join('');
 
-      // Áreas dinâmicas baseadas no CSV
       const areaSelect = document.getElementById('filter-area');
       const areas = [...new Set(rawData.map(d => d.area))].sort();
       areaSelect.innerHTML = '<option value="ALL" selected>Todas as Áreas</option>' + areas.map(a => `<option value="${a}">Área ${a}</option>`).join('');
@@ -462,7 +462,6 @@
       const numMeses = mesesUnicos.length || 1;
       const mediaMensal = totalCusto / numMeses;
 
-      // Pico
       let custoPorMes = {};
       filteredData.forEach(d => {
         custoPorMes[d.mesAno] = (custoPorMes[d.mesAno] || 0) + d.valor;
@@ -477,7 +476,6 @@
         }
       });
 
-      // Headcount Médio
       let hcMedio = Math.round(filteredData.reduce((a, b) => a + b.hc, 0) / (filteredData.length || 1));
       let hcCustoMedio = totalCusto / (numMeses * (hcMedio || 1));
 
@@ -534,7 +532,7 @@
         }
       });
 
-      // Chart 2: Mês Atual por Área
+      // Chart 2: Mês Atual por Área (BARRAS HORIZONTAIS COM ÁREA OFENSORA EM PRIMEIRA E EM DESTAQUE)
       let ultimosMeses = labelsEvol;
       let ultimoMes = ultimosMeses[ultimosMeses.length - 1] || 'jan/2024';
       let dadosUltimoMes = filteredData.filter(d => `${d.mes}/${d.ano}` === ultimoMes);
@@ -542,20 +540,43 @@
       let areaUltimoMes = {};
       dadosUltimoMes.forEach(d => { areaUltimoMes[d.area] = (areaUltimoMes[d.area] || 0) + d.valor; });
 
+      // Ordenar do MAIOR custo para o MENOR custo
+      let sortedAreasUltimoMes = Object.keys(areaUltimoMes).sort((a, b) => areaUltimoMes[b] - areaUltimoMes[a]);
+      let valoresUltimoMes = sortedAreasUltimoMes.map(a => areaUltimoMes[a]);
+
+      // Criar array de cores destacando a 1ª posição (Área Ofensora) em vermelho/rosa (#f43f5e)
+      let bgColorsMes = sortedAreasUltimoMes.map((a, idx) => idx === 0 ? '#f43f5e' : '#38bdf8');
+
       const ctxMes = document.getElementById('chartMesAtualArea').getContext('2d');
       chartInstances.mesAtual = new Chart(ctxMes, {
-        type: 'doughnut',
+        type: 'bar',
         data: {
-          labels: Object.keys(areaUltimoMes).map(a => `Área ${a}`),
+          labels: sortedAreasUltimoMes.map(a => `Área ${a}`),
           datasets: [{
-            data: Object.values(areaUltimoMes),
-            backgroundColor: ['#00a9e0', '#660099', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#64748b']
+            label: 'Custo no Mês',
+            data: valoresUltimoMes,
+            backgroundColor: bgColorsMes,
+            borderRadius: 6
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } }, tooltip: { callbacks: { label: c => ` ${c.label}: ${fmtR$(c.raw)}` } } }
+          indexAxis: 'y', // Barras horizontais para facilitar leitura e destacar o primeiro lugar
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function(c) {
+                  let isTop = c.dataIndex === 0;
+                  return `${isTop ? '🚨 OFENSORA PRINCIPAL: ' : ' Custo: '}${fmtR$(c.raw)}`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: { ticks: { callback: v => 'R$ ' + (v/1000).toFixed(0) + 'k' } }
+          }
         }
       });
 
@@ -595,7 +616,7 @@
           datasets: [{
             label: 'Custo Total',
             data: sortedAreas.map(a => areaCustoMap[a]),
-            backgroundColor: '#00a9e0',
+            backgroundColor: sortedAreas.map((a, idx) => idx === 0 ? '#e11d48' : '#00a9e0'),
             borderRadius: 6
           }]
         },
