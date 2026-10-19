@@ -3,27 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <!-- FORÇAR O NAVEGADOR A NÃO GUARDAR CACHE ANTIGO -->
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
-
-  <title>Portal de Fechamento de Horas Extras | CONTRATO VIVO - SPI v3.0</title>
+  <title>Portal de Fechamento de Horas Extras | CONTRATO VIVO - SPI</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Chart.js CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Chart.js Plugin Datalabels -->
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <!-- PapaParse CDN para Leitura do Google Sheets CSV -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
   <style>
-    body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+    body { font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     
     @media print {
       header, #btn-export-pdf, button, input, select, #login-screen {
@@ -376,8 +368,6 @@
 
   <!-- ================= LÓGICA JAVASCRIPT ================= -->
   <script>
-    Chart.register(ChartDataLabels);
-
     const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQZQ1H_MHtywA4MhrFlGkuLCL0lNQmwwjVDObrj2iryoxNlLdat0pwQFJyDDY6WImYbLDwauF_41E_k/pub?gid=135833026&single=true&output=csv';
 
     let rawData = [];
@@ -673,7 +663,7 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: { datalabels: { display: false }, legend: { display: false }, tooltip: { callbacks: { label: c => ` Custo: ${fmtR$(c.raw)}` } } },
+          plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` Custo: ${fmtR$(c.raw)}` } } },
           scales: { y: { ticks: { callback: v => 'R$ ' + (v/1000).toFixed(0) + 'k' } } }
         }
       });
@@ -706,7 +696,6 @@
           maintainAspectRatio: false,
           indexAxis: 'y',
           plugins: {
-            datalabels: { display: false },
             legend: { display: false },
             tooltip: { callbacks: { label: c => ` Custo: ${fmtR$(c.raw)}` } }
           },
@@ -735,14 +724,6 @@
           maintainAspectRatio: false,
           plugins: {
             legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } },
-            datalabels: {
-              color: '#ffffff',
-              font: { weight: 'bold', size: 11 },
-              formatter: (value) => {
-                let pct = ((value / totGeralHoras) * 100).toFixed(1);
-                return pct > 3 ? `${pct}%` : '';
-              }
-            },
             tooltip: { callbacks: { label: c => ` ${c.label}: ${c.raw.toFixed(1)}h (${((c.raw/totGeralHoras)*100).toFixed(1)}%)` } }
           }
         }
@@ -793,7 +774,6 @@
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            datalabels: { display: false },
             legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } },
             tooltip: {
               callbacks: {
@@ -827,7 +807,7 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: { datalabels: { display: false }, legend: { display: false }, tooltip: { callbacks: { label: c => ` Custo: ${fmtR$(c.raw)}` } } },
+          plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` Custo: ${fmtR$(c.raw)}` } } },
           scales: { y: { ticks: { callback: v => 'R$ ' + (v/1000).toFixed(0) + 'k' } } }
         }
       });
@@ -862,7 +842,7 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: { datalabels: { display: false }, legend: { display: false }, tooltip: { callbacks: { label: c => ` Eficiência: ${fmtR$(c.raw)} / HC / Mês` } } },
+          plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ` Eficiência: ${fmtR$(c.raw)} / HC / Mês` } } },
           scales: { y: { ticks: { callback: v => 'R$ ' + v.toFixed(0) } } }
         }
       });
@@ -894,7 +874,6 @@
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            datalabels: { display: false },
             legend: { display: false },
             tooltip: { callbacks: { label: c => ` Total Headcount: ${c.raw} HC` } }
           },
