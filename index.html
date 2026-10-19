@@ -15,11 +15,32 @@
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
   <!-- PapaParse CDN para Leitura do Google Sheets CSV -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <!-- html2pdf.js CDN para Exportação do Painel Completo em PDF -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
   <style>
     body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+    
+    /* Regras de Impressão e PDF Nativo */
+    @media print {
+      header, #btn-export-pdf, button, input, select, #login-screen {
+        display: none !important;
+      }
+      body {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+      }
+      #main-portal {
+        display: block !important;
+      }
+      .shadow-sm, .shadow-md, .shadow-lg, .shadow-2xl {
+        box-shadow: none !important;
+      }
+      .border {
+        border-color: #e2e8f0 !important;
+      }
+      .page-break {
+        page-break-before: always;
+      }
+    }
   </style>
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col antialiased selection:bg-sky-500 selection:text-white">
@@ -86,10 +107,10 @@
         </div>
 
         <div class="flex items-center gap-3">
-          <!-- BOTÃO EXPORTAR PDF (NOVO) -->
-          <button id="btn-export-pdf" onclick="exportPanelToPDF()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-lg shadow transition flex items-center gap-2">
+          <!-- Botão de Exportação em PDF Leve Nativo -->
+          <button id="btn-export-pdf" onclick="window.print()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-lg shadow transition flex items-center gap-2">
             <i class="fa-solid fa-file-pdf"></i>
-            <span id="btn-pdf-text">Exportar PDF</span>
+            <span>Exportar PDF</span>
           </button>
 
           <button onclick="loadGoogleSheetData()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-semibold rounded-lg border border-slate-600 transition flex items-center gap-2">
@@ -116,7 +137,7 @@
       </div>
     </header>
 
-    <!-- Content Printable Area ID -->
+    <!-- Área Principal de Conteúdo -->
     <div id="printable-dashboard" class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
       <!-- Bar de Filtros -->
@@ -382,28 +403,6 @@
       document.getElementById('main-portal').classList.remove('flex');
       document.getElementById('login-screen').classList.remove('hidden');
       document.getElementById('login-screen').classList.remove('opacity-0');
-    }
-
-    // EXPORTAÇÃO DO PAINEL PARA PDF
-    function exportPanelToPDF() {
-      const element = document.getElementById('printable-dashboard');
-      const btnText = document.getElementById('btn-pdf-text');
-      btnText.innerText = "Gerando PDF...";
-
-      const opt = {
-        margin: [8, 8, 8, 8],
-        filename: `Relatorio_Fechamento_Horas_Extras_SPI_${new Date().toISOString().slice(0,10)}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, logging: false },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
-      };
-
-      html2pdf().set(opt).from(element).save().then(() => {
-        btnText.innerText = "Exportar PDF";
-      }).catch(err => {
-        console.error("Erro ao gerar PDF:", err);
-        btnText.innerText = "Exportar PDF";
-      });
     }
 
     function timeToHours(timeStr) {
