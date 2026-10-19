@@ -15,6 +15,8 @@
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
   <!-- PapaParse CDN para Leitura do Google Sheets CSV -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <!-- html2pdf.js CDN para Exportação do Painel Completo em PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
   <style>
     body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
@@ -84,6 +86,12 @@
         </div>
 
         <div class="flex items-center gap-3">
+          <!-- BOTÃO EXPORTAR PDF (NOVO) -->
+          <button id="btn-export-pdf" onclick="exportPanelToPDF()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-lg shadow transition flex items-center gap-2">
+            <i class="fa-solid fa-file-pdf"></i>
+            <span id="btn-pdf-text">Exportar PDF</span>
+          </button>
+
           <button onclick="loadGoogleSheetData()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-semibold rounded-lg border border-slate-600 transition flex items-center gap-2">
             <i class="fa-solid fa-rotate text-sky-400" id="sync-icon"></i>
             <span>Sincronizar Planilha</span>
@@ -108,10 +116,10 @@
       </div>
     </header>
 
-    <!-- Main Content -->
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    <!-- Content Printable Area ID -->
+    <div id="printable-dashboard" class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-      <!-- Bar de Filtros Expandida (Ano, Mês, Área, DDD) -->
+      <!-- Bar de Filtros -->
       <section class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-4">
         <div class="flex items-center gap-2 text-xs font-semibold text-slate-600">
           <i class="fa-solid fa-filter text-sky-600"></i>
@@ -119,22 +127,18 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-3">
-          <!-- Filtro por Ano -->
           <select id="filter-ano" onchange="applyFilters()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none">
             <option value="ALL">Todos os Anos</option>
           </select>
 
-          <!-- Filtro por Mês (NOVO) -->
           <select id="filter-mes" onchange="applyFilters()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none">
             <option value="ALL">Todos os Meses</option>
           </select>
 
-          <!-- Filtro por DDD (NOVO) -->
           <select id="filter-ddd" onchange="applyFilters()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none">
             <option value="ALL">Todos os DDDs</option>
           </select>
 
-          <!-- Filtro por Área -->
           <select id="filter-area" onchange="applyFilters()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none">
             <option value="ALL">Todas as Áreas</option>
           </select>
@@ -233,10 +237,8 @@
         </div>
       </section>
 
-      <!-- Linha de Gráficos 2: NOVO GRÁFICO TOP 3 OFENSORES POR MODALIDADE + Distribuição Modalidades -->
+      <!-- Linha de Gráficos 2: Distribuição por Modalidade + Top 3 por Modalidade -->
       <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        <!-- Distribuição por Modalidade % -->
         <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
           <div class="flex items-center justify-between border-b pb-3">
             <div>
@@ -250,7 +252,6 @@
           </div>
         </div>
 
-        <!-- NOVO: Top 3 Ofensores por Modalidade -->
         <div class="lg:col-span-2 bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
           <div class="flex items-center justify-between border-b pb-3">
             <div>
@@ -263,7 +264,6 @@
             <canvas id="chartTop3Modalidades"></canvas>
           </div>
         </div>
-
       </section>
 
       <!-- Linha de Gráficos 3: Áreas Ofensoras + Custo Médio por HC + Evolução Headcount -->
@@ -340,7 +340,7 @@
         </div>
       </section>
 
-    </main>
+    </div>
 
     <!-- Footer -->
     <footer class="bg-slate-900 text-slate-400 text-[11px] py-4 text-center border-t border-slate-800">
@@ -384,6 +384,28 @@
       document.getElementById('login-screen').classList.remove('opacity-0');
     }
 
+    // EXPORTAÇÃO DO PAINEL PARA PDF
+    function exportPanelToPDF() {
+      const element = document.getElementById('printable-dashboard');
+      const btnText = document.getElementById('btn-pdf-text');
+      btnText.innerText = "Gerando PDF...";
+
+      const opt = {
+        margin: [8, 8, 8, 8],
+        filename: `Relatorio_Fechamento_Horas_Extras_SPI_${new Date().toISOString().slice(0,10)}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, logging: false },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+      };
+
+      html2pdf().set(opt).from(element).save().then(() => {
+        btnText.innerText = "Exportar PDF";
+      }).catch(err => {
+        console.error("Erro ao gerar PDF:", err);
+        btnText.innerText = "Exportar PDF";
+      });
+    }
+
     function timeToHours(timeStr) {
       if (!timeStr) return 0;
       let parts = timeStr.toString().trim().split(':');
@@ -401,7 +423,6 @@
       return parseFloat(clean) || 0;
     }
 
-    // Extrai o DDD numérico a partir do nome da Área (ex: "19-CAS" -> "19", "12" -> "12")
     function extractDDD(areaStr) {
       if (!areaStr) return 'Outros';
       let match = areaStr.toString().match(/\d+/);
@@ -477,31 +498,25 @@
       processParsedData(sample);
     }
 
-    // 3. POPULAR SELETORES (INCLUINDO MÊS E DDD)
     function populateSelectOptions() {
-      // Anos
       const anoSelect = document.getElementById('filter-ano');
       const anos = [...new Set(rawData.map(d => d.ano))].sort((a,b) => b - a);
       anoSelect.innerHTML = '<option value="ALL" selected>Todos os Anos</option>' + anos.map(a => `<option value="${a}">Ano ${a}</option>`).join('');
 
-      // Meses
       const mesSelect = document.getElementById('filter-mes');
       const ordemMeses = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
       const mesesPresentes = [...new Set(rawData.map(d => d.mes))].sort((a,b) => ordemMeses.indexOf(a) - ordemMeses.indexOf(b));
       mesSelect.innerHTML = '<option value="ALL" selected>Todos os Meses</option>' + mesesPresentes.map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('');
 
-      // DDDs
       const dddSelect = document.getElementById('filter-ddd');
       const ddds = [...new Set(rawData.map(d => d.ddd))].sort((a,b) => a - b);
       dddSelect.innerHTML = '<option value="ALL" selected>Todos os DDDs</option>' + ddds.map(d => `<option value="${d}">DDD ${d}</option>`).join('');
 
-      // Áreas
       const areaSelect = document.getElementById('filter-area');
       const areas = [...new Set(rawData.map(d => d.area))].sort();
       areaSelect.innerHTML = '<option value="ALL" selected>Todas as Áreas</option>' + areas.map(a => `<option value="${a}">Área ${a}</option>`).join('');
     }
 
-    // 4. APLICAÇÃO DE FILTROS
     function applyFilters() {
       const selectedAno = document.getElementById('filter-ano').value;
       const selectedMes = document.getElementById('filter-mes').value;
@@ -533,7 +548,6 @@
       return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     }
 
-    // 5. CÁLCULO E RENDERIZAÇÃO DE KPIS
     function renderKPIs() {
       const totalCusto = filteredData.reduce((acc, d) => acc + d.valor, 0);
       const ordemMeses = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
@@ -562,7 +576,6 @@
         }
       });
 
-      // COMP. ÚLTIMO MÊS
       let compValorElem = document.getElementById('kpi-comp-valor');
       let compSubElem = document.getElementById('kpi-comp-sub');
       let compIconElem = document.getElementById('kpi-comp-icon');
@@ -603,7 +616,6 @@
         compIconElem.className = "fa-solid fa-circle-info text-slate-300 text-sm";
       }
 
-      // Headcount
       let ultimoMesAno = listaMesesAno[listaMesesAno.length - 1] || 'jan/2024';
       let dadosUltimoMes = filteredData.filter(d => d.mesAno === ultimoMesAno);
       let hcAtualTotal = dadosUltimoMes.reduce((acc, curr) => acc + curr.hc, 0);
@@ -620,13 +632,11 @@
       document.getElementById('kpi-hc-sub').innerText = `Mês: ${ultimoMesAno}`;
     }
 
-    // 6. RENDERIZAÇÃO DOS GRÁFICOS (CHART.JS)
     function renderCharts() {
       Object.keys(chartInstances).forEach(k => { if (chartInstances[k]) chartInstances[k].destroy(); });
 
       const ordemMeses = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
 
-      // Chart 1: Evolução Mensal Custo
       let mesMap = {};
       filteredData.forEach(d => {
         let key = `${d.mes}/${d.ano}`;
@@ -665,7 +675,6 @@
         }
       });
 
-      // Chart 2: Mês Atual por Área
       let ultimosMeses = labelsEvol;
       let ultimoMes = ultimosMeses[ultimosMeses.length - 1] || 'jan/2024';
       let dadosUltimoMes = filteredData.filter(d => `${d.mes}/${d.ano}` === ultimoMes);
@@ -702,7 +711,6 @@
         }
       });
 
-      // Chart 3: Modalidades %
       let totH50 = filteredData.reduce((a, b) => a + b.h50, 0);
       let totH100 = filteredData.reduce((a, b) => a + b.h100, 0);
       let totSob = filteredData.reduce((a, b) => a + b.sob, 0);
@@ -737,7 +745,6 @@
         }
       });
 
-      // NOVO Chart 4: TOP 3 OFENSORES POR MODALIDADE DE HORA
       let modalidadeOfensores = {
         'Horas 50%': {},
         'Horas 100%': {},
@@ -752,22 +759,12 @@
         modalidadeOfensores['Adic. Noturno'][d.area] = (modalidadeOfensores['Adic. Noturno'][d.area] || 0) + d.not;
       });
 
-      const getTop3Str = (mapa) => {
-        return Object.keys(mapa)
-          .sort((a,b) => mapa[b] - mapa[a])
-          .slice(0, 3)
-          .map(a => `Área ${a} (${mapa[a].toFixed(0)}h)`);
-      };
-
       let modalitiesList = ['Horas 50%', 'Horas 100%', 'Sobreaviso', 'Adic. Noturno'];
-      
-      // Criar Datasets para Posição #1, #2 e #3
       let top1Data = [], top2Data = [], top3Data = [];
       let top1Labels = [], top2Labels = [], top3Labels = [];
 
       modalitiesList.forEach(m => {
         let sorted = Object.keys(modalidadeOfensores[m]).sort((a,b) => modalidadeOfensores[m][b] - modalidadeOfensores[m][a]);
-        
         top1Data.push(sorted[0] ? modalidadeOfensores[m][sorted[0]] : 0);
         top1Labels.push(sorted[0] ? `Área ${sorted[0]}` : '--');
 
@@ -808,7 +805,6 @@
         }
       });
 
-      // Chart 5: Áreas Ofensoras Geral
       let areaCustoMap = {};
       filteredData.forEach(d => { areaCustoMap[d.area] = (areaCustoMap[d.area] || 0) + d.valor; });
       let sortedAreas = Object.keys(areaCustoMap).sort((a,b) => areaCustoMap[b] - areaCustoMap[a]);
@@ -833,7 +829,6 @@
         }
       });
 
-      // Chart 6: Custo Médio R$/HC/Mês por Área
       let areaHCMap = {};
       let areaMesesSet = {};
       filteredData.forEach(d => {
@@ -869,7 +864,6 @@
         }
       });
 
-      // Chart 7: EVOLUÇÃO MENSAL DO HEADCOUNT
       let hcMesMap = {};
       filteredData.forEach(d => {
         let key = `${d.mes}/${d.ano}`;
@@ -906,7 +900,6 @@
       });
     }
 
-    // 7. TABELA DE DETALHAMENTO
     function renderTable() {
       const tbody = document.getElementById('table-body');
       const search = (document.getElementById('table-search').value || '').toLowerCase();
