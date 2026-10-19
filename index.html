@@ -3,27 +3,35 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Portal de Fechamento de Horas Extras | CONTRATO VIVO - SPI</title>
-  
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Portal Fechamento Horas Extras | Vivo SPI</title>
+
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Chart.js Plugin Datalabels -->
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
-  <!-- PapaParse CDN para Leitura do Google Sheets CSV -->
+  <!-- PapaParse CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
   <style>
-    body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+    body { font-family: system-ui, -apple-system, sans-serif; }
+    @media print {
+      header, #btn-export-pdf, button, input, select, #login-screen { display: none !important; }
+      body { background-color: #ffffff !important; color: #000000 !important; }
+      #main-portal { display: block !important; }
+      .shadow-sm, .shadow-md, .shadow-lg, .shadow-2xl { box-shadow: none !important; }
+      .border { border-color: #e2e8f0 !important; }
+    }
   </style>
 </head>
-<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col antialiased selection:bg-sky-500 selection:text-white">
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col antialiased">
 
-  <!-- ================= TELA DE LOGIN (PROTEÇÃO INICIAL) ================= -->
-  <div id="login-screen" class="fixed inset-0 bg-[#0b2341] z-50 flex items-center justify-center p-4 transition-opacity duration-300">
+  <!-- TELA DE LOGIN -->
+  <div id="login-screen" class="fixed inset-0 bg-[#0b2341] z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl space-y-6 relative overflow-hidden border border-slate-200">
       
       <div class="text-center space-y-2">
@@ -37,22 +45,12 @@
       <form onsubmit="handleLogin(event)" class="space-y-4">
         <div>
           <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Usuário</label>
-          <div class="relative">
-            <i class="fa-solid fa-user absolute left-3 top-3 text-slate-400 text-xs"></i>
-            <input type="text" id="login-user" required placeholder="Digite seu usuário..." value="admin" class="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-800 font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none">
-          </div>
+          <input type="text" id="login-user" required placeholder="Digite seu usuário..." value="admin" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-800 font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none">
         </div>
 
         <div>
           <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Senha</label>
-          <div class="relative">
-            <i class="fa-solid fa-lock absolute left-3 top-3 text-slate-400 text-xs"></i>
-            <input type="password" id="login-pass" required placeholder="Digite sua senha..." value="admin123" class="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-800 font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none">
-          </div>
-        </div>
-
-        <div id="login-alert" class="hidden text-xs bg-rose-50 text-rose-700 border border-rose-200 p-2.5 rounded-lg text-center font-medium">
-          <i class="fa-solid fa-triangle-exclamation mr-1"></i> Usuário ou senha incorretos!
+          <input type="password" id="login-pass" required placeholder="Digite sua senha..." value="admin123" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-800 font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none">
         </div>
 
         <button type="submit" id="btn-login" class="w-full py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs rounded-lg shadow-md transition flex items-center justify-center gap-2">
@@ -67,7 +65,7 @@
     </div>
   </div>
 
-  <!-- ================= PORTAL PRINCIPAL ================= -->
+  <!-- PORTAL PRINCIPAL -->
   <div id="main-portal" class="hidden min-h-screen flex-col">
     
     <!-- Topbar Header -->
@@ -84,6 +82,11 @@
         </div>
 
         <div class="flex items-center gap-3">
+          <button id="btn-export-pdf" onclick="window.print()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold rounded-lg shadow transition flex items-center gap-2">
+            <i class="fa-solid fa-file-pdf"></i>
+            <span>Exportar PDF</span>
+          </button>
+
           <button onclick="loadGoogleSheetData()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-semibold rounded-lg border border-slate-600 transition flex items-center gap-2">
             <i class="fa-solid fa-rotate text-sky-400" id="sync-icon"></i>
             <span>Sincronizar Planilha</span>
@@ -108,10 +111,10 @@
       </div>
     </header>
 
-    <!-- Main Content -->
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    <!-- Conteúdo do Dashboard -->
+    <div id="printable-dashboard" class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-      <!-- Bar de Filtros -->
+      <!-- BARRA DE FILTROS COMPLETA -->
       <section class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-4">
         <div class="flex items-center gap-2 text-xs font-semibold text-slate-600">
           <i class="fa-solid fa-filter text-sky-600"></i>
@@ -121,6 +124,14 @@
         <div class="flex flex-wrap items-center gap-3">
           <select id="filter-ano" onchange="applyFilters()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none">
             <option value="ALL">Todos os Anos</option>
+          </select>
+
+          <select id="filter-mes" onchange="applyFilters()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none">
+            <option value="ALL">Todos os Meses</option>
+          </select>
+
+          <select id="filter-ddd" onchange="applyFilters()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none">
+            <option value="ALL">Todos os DDDs</option>
           </select>
 
           <select id="filter-area" onchange="applyFilters()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none">
@@ -133,10 +144,9 @@
         </div>
       </section>
 
-      <!-- Cards de KPIs Principais (Ajustado para 6 colunas) -->
+      <!-- Cards de KPIs Principais -->
       <section class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         
-        <!-- Card 1: Custo Total -->
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
           <div class="flex items-center justify-between text-slate-500 text-xs font-semibold">
             <span>CUSTO TOTAL</span>
@@ -146,7 +156,6 @@
           <p class="text-[11px] text-slate-500 font-medium">Acumulado do Período</p>
         </div>
 
-        <!-- Card 2: Média Mensal -->
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
           <div class="flex items-center justify-between text-slate-500 text-xs font-semibold">
             <span>MÉDIA MENSAL</span>
@@ -156,7 +165,6 @@
           <p class="text-[11px] text-slate-500 font-medium">Custo Médio por Mês</p>
         </div>
 
-        <!-- Card 3: Mês de Pico -->
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
           <div class="flex items-center justify-between text-slate-500 text-xs font-semibold">
             <span>MÊS DE PICO</span>
@@ -166,17 +174,15 @@
           <p id="kpi-pico-valor" class="text-[11px] text-slate-500 font-medium">R$ 0,00</p>
         </div>
 
-        <!-- NOVO Card 4: COMPARATIVO ÚLTIMO MÊS -->
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
           <div class="flex items-center justify-between text-slate-500 text-xs font-semibold">
             <span>COMP. ÚLTIMO MÊS</span>
             <i id="kpi-comp-icon" class="fa-solid fa-arrow-right-arrow-left text-slate-400 text-sm"></i>
           </div>
-          <p id="kpi-comp-valor" class="text-lg font-extrabold text-slate-900">R$ 0,00</p>
+          <p id="kpi-comp-valor" class="text-lg font-extrabold text-slate-900">0.0%</p>
           <p id="kpi-comp-sub" class="text-[11px] font-semibold text-slate-500">Vs. Mês Anterior</p>
         </div>
 
-        <!-- Card 5: Custo / HC / Mês -->
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
           <div class="flex items-center justify-between text-slate-500 text-xs font-semibold">
             <span>CUSTO / HC / MÊS</span>
@@ -186,7 +192,6 @@
           <p class="text-[11px] text-slate-500 font-medium">Eficiência p/ Colaborador</p>
         </div>
 
-        <!-- Card 6: Headcount Atual -->
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
           <div class="flex items-center justify-between text-slate-500 text-xs font-semibold">
             <span>HEADCOUNT ATUAL</span>
@@ -198,7 +203,7 @@
 
       </section>
 
-      <!-- Linha de Gráficos 1: Evolução Temporal + Mês Atual por Área -->
+      <!-- Linha 1: Evolução Temporal + Mês Atual por Área -->
       <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2 bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
           <div class="flex items-center justify-between border-b pb-3">
@@ -227,7 +232,7 @@
         </div>
       </section>
 
-      <!-- Linha de Gráficos 2: Distribuição de Modalidades COM PORCENTAGEM % + Regiões/Áreas Ofensoras -->
+      <!-- Linha 2: Distribuição por Modalidade + Top 3 por Modalidade -->
       <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
           <div class="flex items-center justify-between border-b pb-3">
@@ -235,7 +240,7 @@
               <h2 class="text-sm font-bold text-slate-900">Distribuição por Modalidade (%)</h2>
               <p class="text-xs text-slate-500">Proporção total de 50%, 100%, Sobreaviso e Ad. Noturno</p>
             </div>
-            <i class="fa-solid fa-pie-chart text-slate-400"></i>
+            <i class="fa-solid fa-chart-pie text-slate-400"></i>
           </div>
           <div class="relative h-72 flex items-center justify-center">
             <canvas id="chartModalidade"></canvas>
@@ -245,26 +250,39 @@
         <div class="lg:col-span-2 bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
           <div class="flex items-center justify-between border-b pb-3">
             <div>
-              <h2 class="text-sm font-bold text-slate-900">Áreas / Regiões Ofensoras (Custo Total Acumulado)</h2>
-              <p class="text-xs text-slate-500">Ranking geral das áreas com maior volume financeiro de horas extras</p>
+              <h2 class="text-sm font-bold text-slate-900">Top 3 Ofensores por Modalidade de Hora</h2>
+              <p class="text-xs text-slate-500">As 3 principais áreas geradoras de custo para cada tipo de hora</p>
             </div>
-            <span class="px-2.5 py-1 bg-rose-50 text-rose-700 text-[10px] font-bold rounded-full uppercase border border-rose-200">Top Ofensores</span>
+            <span class="px-2.5 py-1 bg-rose-50 text-rose-700 text-[10px] font-bold rounded-full uppercase border border-rose-200">Top 3 por Modalidade</span>
+          </div>
+          <div class="relative h-72">
+            <canvas id="chartTop3Modalidades"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- Linha 3: Áreas Ofensoras + Custo Médio por HC + Evolução Headcount -->
+      <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+          <div class="flex items-center justify-between border-b pb-3">
+            <div>
+              <h2 class="text-sm font-bold text-slate-900">Áreas Ofensoras (Geral)</h2>
+              <p class="text-xs text-slate-500">Ranking do volume financeiro total</p>
+            </div>
+            <span class="px-2.5 py-1 bg-rose-50 text-rose-700 text-[10px] font-bold rounded-full uppercase border border-rose-200">Ranking Geral</span>
           </div>
           <div class="relative h-72">
             <canvas id="chartAreasOfensoras"></canvas>
           </div>
         </div>
-      </section>
 
-      <!-- Linha de Gráficos 3: Custo Médio por Colaborador + Evolução Mensal do Headcount -->
-      <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
           <div class="flex items-center justify-between border-b pb-3">
             <div>
-              <h2 class="text-sm font-bold text-slate-900">Custo Médio Mensal por Colaborador (R$ / HC / Mês)</h2>
-              <p class="text-xs text-slate-500">Eficiência operacional de horas extras por Headcount</p>
+              <h2 class="text-sm font-bold text-slate-900">Custo Médio / HC (R$)</h2>
+              <p class="text-xs text-slate-500">Eficiência R$/HC/Mês por área</p>
             </div>
-            <span class="px-2.5 py-1 bg-purple-50 text-purple-700 text-[10px] font-bold rounded-full uppercase border border-purple-200">Eficiência R$/HC</span>
+            <span class="px-2.5 py-1 bg-purple-50 text-purple-700 text-[10px] font-bold rounded-full uppercase border border-purple-200">R$/HC/Mês</span>
           </div>
           <div class="relative h-72">
             <canvas id="chartHCEficiencia"></canvas>
@@ -274,8 +292,8 @@
         <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
           <div class="flex items-center justify-between border-b pb-3">
             <div>
-              <h2 class="text-sm font-bold text-slate-900">Evolução Mensal do Headcount (HC Total)</h2>
-              <p class="text-xs text-slate-500">Variação do número de colaboradores ativos ao longo do tempo</p>
+              <h2 class="text-sm font-bold text-slate-900">Evolução de Headcount</h2>
+              <p class="text-xs text-slate-500">Total de colaboradores ativos</p>
             </div>
             <span class="px-2.5 py-1 bg-amber-50 text-amber-700 text-[10px] font-bold rounded-full uppercase border border-amber-200">Evolução HC</span>
           </div>
@@ -292,7 +310,7 @@
             <h3 class="text-sm font-bold text-slate-900">Detalhamento por Área e Período</h3>
             <p class="text-xs text-slate-500">Registros consolidados sincronizados do Google Sheets</p>
           </div>
-          <input type="text" id="table-search" oninput="renderTable()" placeholder="Buscar área, mês..." class="text-xs bg-white border border-slate-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-sky-500 focus:outline-none w-64">
+          <input type="text" id="table-search" oninput="renderTable()" placeholder="Buscar área, DDD, mês..." class="text-xs bg-white border border-slate-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-sky-500 focus:outline-none w-64">
         </div>
 
         <div class="overflow-x-auto max-h-80">
@@ -301,7 +319,7 @@
               <tr>
                 <th class="p-3 font-bold">Mês/Ano</th>
                 <th class="p-3 font-bold">Período Fechamento</th>
-                <th class="p-3 font-bold">Área</th>
+                <th class="p-3 font-bold">Área / DDD</th>
                 <th class="p-3 font-bold text-center">HC</th>
                 <th class="p-3 font-bold text-right">Horas 50%</th>
                 <th class="p-3 font-bold text-right">Horas 100%</th>
@@ -311,13 +329,12 @@
               </tr>
             </thead>
             <tbody id="table-body" class="divide-y divide-slate-100 text-slate-700">
-              <!-- Preenchido dinamicamente -->
             </tbody>
           </table>
         </div>
       </section>
 
-    </main>
+    </div>
 
     <!-- Footer -->
     <footer class="bg-slate-900 text-slate-400 text-[11px] py-4 text-center border-t border-slate-800">
@@ -326,10 +343,7 @@
 
   </div>
 
-  <!-- ================= LÓGICA JAVASCRIPT ================= -->
   <script>
-    Chart.register(ChartDataLabels);
-
     const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQZQ1H_MHtywA4MhrFlGkuLCL0lNQmwwjVDObrj2iryoxNlLdat0pwQFJyDDY6WImYbLDwauF_41E_k/pub?gid=135833026&single=true&output=csv';
 
     let rawData = [];
@@ -338,27 +352,16 @@
 
     function handleLogin(event) {
       event.preventDefault();
-      const user = document.getElementById('login-user').value;
-      const pass = document.getElementById('login-pass').value;
-
-      if ((user.trim().toLowerCase() === 'admin' && pass === 'admin123') || user.trim() !== '') {
-        document.getElementById('login-screen').classList.add('opacity-0');
-        setTimeout(() => {
-          document.getElementById('login-screen').classList.add('hidden');
-          document.getElementById('main-portal').classList.remove('hidden');
-          document.getElementById('main-portal').classList.add('flex');
-          loadGoogleSheetData();
-        }, 300);
-      } else {
-        document.getElementById('login-alert').classList.remove('hidden');
-      }
+      document.getElementById('login-screen').classList.add('hidden');
+      document.getElementById('main-portal').classList.remove('hidden');
+      document.getElementById('main-portal').classList.add('flex');
+      loadGoogleSheetData();
     }
 
     function handleLogout() {
       document.getElementById('main-portal').classList.add('hidden');
       document.getElementById('main-portal').classList.remove('flex');
       document.getElementById('login-screen').classList.remove('hidden');
-      document.getElementById('login-screen').classList.remove('opacity-0');
     }
 
     function timeToHours(timeStr) {
@@ -367,8 +370,7 @@
       if (parts.length < 2) return parseFloat(timeStr) || 0;
       let h = parseInt(parts[0], 10) || 0;
       let m = parseInt(parts[1], 10) || 0;
-      let s = parts[2] ? parseInt(parts[2], 10) || 0 : 0;
-      return h + (m / 60) + (s / 3600);
+      return h + (m / 60);
     }
 
     function parseCurrency(val) {
@@ -378,25 +380,21 @@
       return parseFloat(clean) || 0;
     }
 
-    function loadGoogleSheetData() {
-      const syncIcon = document.getElementById('sync-icon');
-      if (syncIcon) syncIcon.classList.add('fa-spin');
+    function extractDDD(areaStr) {
+      if (!areaStr) return 'Outros';
+      let match = areaStr.toString().match(/\d+/);
+      return match ? match[0] : 'Outros';
+    }
 
-      Papa.parse(GOOGLE_SHEET_CSV_URL, {
+    function loadGoogleSheetData() {
+       Papa.parse(GOOGLE_SHEET_CSV_URL, {
         download: true,
         header: true,
         skipEmptyLines: true,
         complete: function(results) {
-          if (syncIcon) syncIcon.classList.remove('fa-spin');
           if (results.data && results.data.length > 0) {
             processParsedData(results.data);
-          } else {
-            loadMockFallbackData();
           }
-        },
-        error: function() {
-          if (syncIcon) syncIcon.classList.remove('fa-spin');
-          loadMockFallbackData();
         }
       });
     }
@@ -414,14 +412,16 @@
         const sob = timeToHours(row['SOBREAVISO'] || row['SOBREAVISO ']);
         const not = timeToHours(row['AD.NOTURNO'] || row['AD.NOTURNO ']);
         const valor = parseCurrency(row['VALOR TOTAL $'] || row['VALOR TOTAL']);
+        const ddd = extractDDD(area);
 
         return {
           id: idx,
           ano: ano.toString().trim(),
-          mes: mes.toString().trim(),
-          mesAno: `${mes.toString().trim()}/${ano.toString().trim()}`,
+          mes: mes.toString().trim().toLowerCase(),
+          mesAno: `${mes.toString().trim().toLowerCase()}/${ano.toString().trim()}`,
           periodo: periodo,
           area: area,
+          ddd: ddd,
           hc: hc,
           h50: h50,
           h100: h100,
@@ -435,20 +435,19 @@
       applyFilters();
     }
 
-    function loadMockFallbackData() {
-      const sample = [
-        { ANO: '2024', MÊS: 'jan', 'PERÍODO FECHAMENTO': '15/12/2023 - 14/01/2024', ÁREAS: '12', HC: '60', 'HORAS 50%': '451:03:00', 'HORAS 100%': '698:38:00', SOBREAVISO: '2925:18:00', 'AD.NOTURNO': '1156:48:00', 'VALOR TOTAL $': 'R$ 72.939,85' },
-        { ANO: '2024', MÊS: 'jan', 'PERÍODO FECHAMENTO': '15/12/2023 - 14/01/2024', ÁREAS: '14', HC: '64', 'HORAS 50%': '762:13:00', 'HORAS 100%': '415:58:00', SOBREAVISO: '4594:36:00', 'AD.NOTURNO': '678:02:00', 'VALOR TOTAL $': 'R$ 74.370,53' },
-        { ANO: '2024', MÊS: 'ago', 'PERÍODO FECHAMENTO': '15/07/2024 - 14/08/2024', ÁREAS: '14', HC: '64', 'HORAS 50%': '793:44:00', 'HORAS 100%': '244:12:00', SOBREAVISO: '4601:52:00', 'AD.NOTURNO': '700:48:50', 'VALOR TOTAL $': 'R$ 64.051,35' },
-        { ANO: '2024', MÊS: 'set', 'PERÍODO FECHAMENTO': '15/08/2024 - 14/09/2024', ÁREAS: '19-CAS', HC: '67', 'HORAS 50%': '749:58:00', 'HORAS 100%': '661:00:00', SOBREAVISO: '4150:52:00', 'AD.NOTURNO': '762:56:00', 'VALOR TOTAL $': 'R$ 76.851,65' }
-      ];
-      processParsedData(sample);
-    }
-
     function populateSelectOptions() {
       const anoSelect = document.getElementById('filter-ano');
       const anos = [...new Set(rawData.map(d => d.ano))].sort((a,b) => b - a);
       anoSelect.innerHTML = '<option value="ALL" selected>Todos os Anos</option>' + anos.map(a => `<option value="${a}">Ano ${a}</option>`).join('');
+
+      const mesSelect = document.getElementById('filter-mes');
+      const ordemMeses = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+      const mesesPresentes = [...new Set(rawData.map(d => d.mes))].sort((a,b) => ordemMeses.indexOf(a) - ordemMeses.indexOf(b));
+      mesSelect.innerHTML = '<option value="ALL" selected>Todos os Meses</option>' + mesesPresentes.map(m => `<option value="${m}">${m.toUpperCase()}</option>`).join('');
+
+      const dddSelect = document.getElementById('filter-ddd');
+      const ddds = [...new Set(rawData.map(d => d.ddd))].sort((a,b) => a - b);
+      dddSelect.innerHTML = '<option value="ALL" selected>Todos os DDDs</option>' + ddds.map(d => `<option value="${d}">DDD ${d}</option>`).join('');
 
       const areaSelect = document.getElementById('filter-area');
       const areas = [...new Set(rawData.map(d => d.area))].sort();
@@ -457,12 +456,16 @@
 
     function applyFilters() {
       const selectedAno = document.getElementById('filter-ano').value;
+      const selectedMes = document.getElementById('filter-mes').value;
+      const selectedDDD = document.getElementById('filter-ddd').value;
       const selectedArea = document.getElementById('filter-area').value;
 
       filteredData = rawData.filter(item => {
         const matchAno = (selectedAno === 'ALL' || item.ano === selectedAno);
+        const matchMes = (selectedMes === 'ALL' || item.mes === selectedMes);
+        const matchDDD = (selectedDDD === 'ALL' || item.ddd === selectedDDD);
         const matchArea = (selectedArea === 'ALL' || item.area === selectedArea);
-        return matchAno && matchArea;
+        return matchAno && matchMes && matchDDD && matchArea;
       });
 
       renderKPIs();
@@ -472,6 +475,8 @@
 
     function resetFilters() {
       document.getElementById('filter-ano').value = 'ALL';
+      document.getElementById('filter-mes').value = 'ALL';
+      document.getElementById('filter-ddd').value = 'ALL';
       document.getElementById('filter-area').value = 'ALL';
       applyFilters();
     }
@@ -480,23 +485,20 @@
       return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     }
 
-    // 5. CÁLCULO E RENDERIZAÇÃO DE KPIS
     function renderKPIs() {
       const totalCusto = filteredData.reduce((acc, d) => acc + d.valor, 0);
       const ordemMeses = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
 
-      // Mapear meses ordenados cronologicamente
       let listaMesesAno = [...new Set(filteredData.map(d => d.mesAno))].sort((a,b) => {
         let [mA, aA] = a.split('/');
         let [mB, aB] = b.split('/');
         if (aA !== aB) return parseInt(aA) - parseInt(aB);
-        return ordemMeses.indexOf(mA.toLowerCase()) - ordemMeses.indexOf(mB.toLowerCase());
+        return ordemMeses.indexOf(mA) - ordemMeses.indexOf(mB);
       });
 
       const numMeses = listaMesesAno.length || 1;
       const mediaMensal = totalCusto / numMeses;
 
-      // Pico
       let custoPorMes = {};
       filteredData.forEach(d => {
         custoPorMes[d.mesAno] = (custoPorMes[d.mesAno] || 0) + d.valor;
@@ -511,10 +513,8 @@
         }
       });
 
-      // --- CÁLCULO DO COMPARATIVO ÚLTIMO MÊS VS MÊS ANTERIOR ---
       let compValorElem = document.getElementById('kpi-comp-valor');
       let compSubElem = document.getElementById('kpi-comp-sub');
-      let compIconElem = document.getElementById('kpi-comp-icon');
 
       if (listaMesesAno.length >= 2) {
         let ultimoMes = listaMesesAno[listaMesesAno.length - 1];
@@ -530,31 +530,24 @@
         let pctFmt = Math.abs(pct).toFixed(1) + '%';
 
         if (diff > 0) {
-          // Aumento de Custo
           compValorElem.innerText = `+${pctFmt}`;
           compValorElem.className = "text-lg font-extrabold text-rose-600";
           compSubElem.innerHTML = `<span class="text-rose-600 font-bold">▲ +${diffFmt}</span> vs. ${penultimoMes}`;
-          compIconElem.className = "fa-solid fa-arrow-trend-up text-rose-500 text-sm";
         } else if (diff < 0) {
-          // Redução de Custo
           compValorElem.innerText = `-${pctFmt}`;
           compValorElem.className = "text-lg font-extrabold text-emerald-600";
           compSubElem.innerHTML = `<span class="text-emerald-600 font-bold">▼ -${diffFmt}</span> vs. ${penultimoMes}`;
-          compIconElem.className = "fa-solid fa-arrow-trend-down text-emerald-500 text-sm";
         } else {
           compValorElem.innerText = `0.0%`;
           compValorElem.className = "text-lg font-extrabold text-slate-700";
           compSubElem.innerText = `Estável vs. ${penultimoMes}`;
-          compIconElem.className = "fa-solid fa-minus text-slate-400 text-sm";
         }
       } else {
         compValorElem.innerText = `--`;
         compValorElem.className = "text-lg font-extrabold text-slate-400";
         compSubElem.innerText = `Período Insuficiente`;
-        compIconElem.className = "fa-solid fa-circle-info text-slate-300 text-sm";
       }
 
-      // Headcount Atual
       let ultimoMesAno = listaMesesAno[listaMesesAno.length - 1] || 'jan/2024';
       let dadosUltimoMes = filteredData.filter(d => d.mesAno === ultimoMesAno);
       let hcAtualTotal = dadosUltimoMes.reduce((acc, curr) => acc + curr.hc, 0);
@@ -571,13 +564,11 @@
       document.getElementById('kpi-hc-sub').innerText = `Mês: ${ultimoMesAno}`;
     }
 
-    // 6. RENDERIZAÇÃO DOS GRÁFICOS (CHART.JS)
     function renderCharts() {
       Object.keys(chartInstances).forEach(k => { if (chartInstances[k]) chartInstances[k].destroy(); });
 
       const ordemMeses = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
 
-      // Chart 1: Evolução Mensal Custo
       let mesMap = {};
       filteredData.forEach(d => {
         let key = `${d.mes}/${d.ano}`;
@@ -588,7 +579,7 @@
         let [mA, aA] = a.split('/');
         let [mB, aB] = b.split('/');
         if (aA !== aB) return parseInt(aA) - parseInt(aB);
-        return ordemMeses.indexOf(mA.toLowerCase()) - ordemMeses.indexOf(mB.toLowerCase());
+        return ordemMeses.indexOf(mA) - ordemMeses.indexOf(mB);
       });
 
       const ctxEvol = document.getElementById('chartEvolucaoMensal').getContext('2d');
@@ -597,26 +588,18 @@
         data: {
           labels: labelsEvol,
           datasets: [{
-            label: 'Custo Total (R$)',
+            label: 'Custo Total',
             data: labelsEvol.map(l => mesMap[l]),
             borderColor: '#00a9e0',
             backgroundColor: 'rgba(0, 169, 224, 0.1)',
             borderWidth: 3,
             fill: true,
-            tension: 0.3,
-            pointBackgroundColor: '#0b2341',
-            pointRadius: 5
+            tension: 0.3
           }]
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { datalabels: { display: false }, legend: { display: false }, tooltip: { callbacks: { label: c => ` Custo: ${fmtR$(c.raw)}` } } },
-          scales: { y: { ticks: { callback: v => 'R$ ' + (v/1000).toFixed(0) + 'k' } } }
-        }
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
       });
 
-      // Chart 2: Mês Atual por Área
       let ultimosMeses = labelsEvol;
       let ultimoMes = ultimosMeses[ultimosMeses.length - 1] || 'jan/2024';
       let dadosUltimoMes = filteredData.filter(d => `${d.mes}/${d.ano}` === ultimoMes);
@@ -634,38 +617,19 @@
         data: {
           labels: sortedAreasUltimoMes.map(a => `Área ${a}`),
           datasets: [{
-            label: 'Custo no Mês',
+            label: 'Custo',
             data: valoresUltimoMes,
             backgroundColor: bgColorsMes,
             borderRadius: 6
           }]
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          indexAxis: 'y',
-          plugins: {
-            datalabels: { display: false },
-            legend: { display: false },
-            tooltip: {
-              callbacks: {
-                label: function(c) {
-                  let isTop = c.dataIndex === 0;
-                  return `${isTop ? '🚨 OFENSORA PRINCIPAL: ' : ' Custo: '}${fmtR$(c.raw)}`;
-                }
-              }
-            }
-          },
-          scales: { x: { ticks: { callback: v => 'R$ ' + (v/1000).toFixed(0) + 'k' } } }
-        }
+        options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } } }
       });
 
-      // Chart 3: Modalidades
       let totH50 = filteredData.reduce((a, b) => a + b.h50, 0);
       let totH100 = filteredData.reduce((a, b) => a + b.h100, 0);
       let totSob = filteredData.reduce((a, b) => a + b.sob, 0);
       let totNot = filteredData.reduce((a, b) => a + b.not, 0);
-      let totGeralHoras = totH50 + totH100 + totSob + totNot || 1;
 
       const ctxMod = document.getElementById('chartModalidade').getContext('2d');
       chartInstances.modalidade = new Chart(ctxMod, {
@@ -677,33 +641,41 @@
             backgroundColor: ['#3b82f6', '#ef4444', '#f59e0b', '#8b5cf6']
           }]
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } },
-            datalabels: {
-              color: '#ffffff',
-              font: { weight: 'bold', size: 11 },
-              formatter: (value) => {
-                let pct = ((value / totGeralHoras) * 100).toFixed(1);
-                return pct > 3 ? `${pct}%` : '';
-              }
-            },
-            tooltip: {
-              callbacks: {
-                label: c => {
-                  let val = c.raw;
-                  let pct = ((val / totGeralHoras) * 100).toFixed(1);
-                  return ` ${c.label}: ${val.toFixed(1)}h (${pct}%)`;
-                }
-              }
-            }
-          }
-        }
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
       });
 
-      // Chart 4: Áreas Ofensoras
+      let modalidadeOfensores = { 'Horas 50%': {}, 'Horas 100%': {}, 'Sobreaviso': {}, 'Adic. Noturno': {} };
+      filteredData.forEach(d => {
+        modalidadeOfensores['Horas 50%'][d.area] = (modalidadeOfensores['Horas 50%'][d.area] || 0) + d.h50;
+        modalidadeOfensores['Horas 100%'][d.area] = (modalidadeOfensores['Horas 100%'][d.area] || 0) + d.h100;
+        modalidadeOfensores['Sobreaviso'][d.area] = (modalidadeOfensores['Sobreaviso'][d.area] || 0) + d.sob;
+        modalidadeOfensores['Adic. Noturno'][d.area] = (modalidadeOfensores['Adic. Noturno'][d.area] || 0) + d.not;
+      });
+
+      let modalitiesList = ['Horas 50%', 'Horas 100%', 'Sobreaviso', 'Adic. Noturno'];
+      let top1Data = [], top2Data = [], top3Data = [];
+
+      modalitiesList.forEach(m => {
+        let sorted = Object.keys(modalidadeOfensores[m]).sort((a,b) => modalidadeOfensores[m][b] - modalidadeOfensores[m][a]);
+        top1Data.push(sorted[0] ? modalidadeOfensores[m][sorted[0]] : 0);
+        top2Data.push(sorted[1] ? modalidadeOfensores[m][sorted[1]] : 0);
+        top3Data.push(sorted[2] ? modalidadeOfensores[m][sorted[2]] : 0);
+      });
+
+      const ctxTop3 = document.getElementById('chartTop3Modalidades').getContext('2d');
+      chartInstances.top3Mod = new Chart(ctxTop3, {
+        type: 'bar',
+        data: {
+          labels: modalitiesList,
+          datasets: [
+            { label: '1º Maior Ofensor', data: top1Data, backgroundColor: '#e11d48' },
+            { label: '2º Maior Ofensor', data: top2Data, backgroundColor: '#f97316' },
+            { label: '3º Maior Ofensor', data: top3Data, backgroundColor: '#eab308' }
+          ]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+      });
+
       let areaCustoMap = {};
       filteredData.forEach(d => { areaCustoMap[d.area] = (areaCustoMap[d.area] || 0) + d.valor; });
       let sortedAreas = Object.keys(areaCustoMap).sort((a,b) => areaCustoMap[b] - areaCustoMap[a]);
@@ -713,58 +685,27 @@
         type: 'bar',
         data: {
           labels: sortedAreas.map(a => `Área ${a}`),
-          datasets: [{
-            label: 'Custo Total',
-            data: sortedAreas.map(a => areaCustoMap[a]),
-            backgroundColor: sortedAreas.map((a, idx) => idx === 0 ? '#e11d48' : '#00a9e0'),
-            borderRadius: 6
-          }]
+          datasets: [{ label: 'Custo Total', data: sortedAreas.map(a => areaCustoMap[a]), backgroundColor: '#00a9e0' }]
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { datalabels: { display: false }, legend: { display: false }, tooltip: { callbacks: { label: c => ` Custo: ${fmtR$(c.raw)}` } } },
-          scales: { y: { ticks: { callback: v => 'R$ ' + (v/1000).toFixed(0) + 'k' } } }
-        }
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
       });
 
-      // Chart 5: Custo Médio R$/HC/Mês por Área
-      let areaHCMap = {};
-      let areaMesesSet = {};
+      let areaHCMap = {}, areaMesesSet = {};
       filteredData.forEach(d => {
         areaHCMap[d.area] = Math.max(areaHCMap[d.area] || 0, d.hc);
         if (!areaMesesSet[d.area]) areaMesesSet[d.area] = new Set();
         areaMesesSet[d.area].add(d.mesAno);
       });
 
-      let hcValues = sortedAreas.map(a => {
-        let custo = areaCustoMap[a];
-        let maxHC = areaHCMap[a] || 1;
-        let nMeses = areaMesesSet[a].size || 1;
-        return custo / (nMeses * maxHC);
-      });
+      let hcValues = sortedAreas.map(a => areaCustoMap[a] / ((areaMesesSet[a].size || 1) * (areaHCMap[a] || 1)));
 
       const ctxEf = document.getElementById('chartHCEficiencia').getContext('2d');
       chartInstances.eficiencia = new Chart(ctxEf, {
         type: 'bar',
-        data: {
-          labels: sortedAreas.map(a => `Área ${a}`),
-          datasets: [{
-            label: 'R$ / HC / Mês',
-            data: hcValues,
-            backgroundColor: '#8b5cf6',
-            borderRadius: 6
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { datalabels: { display: false }, legend: { display: false }, tooltip: { callbacks: { label: c => ` Eficiência: ${fmtR$(c.raw)} / HC / Mês` } } },
-          scales: { y: { ticks: { callback: v => 'R$ ' + v.toFixed(0) } } }
-        }
+        data: { labels: sortedAreas.map(a => `Área ${a}`), datasets: [{ label: 'R$ / HC / Mês', data: hcValues, backgroundColor: '#8b5cf6' }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
       });
 
-      // Chart 6: EVOLUÇÃO MENSAL DO HEADCOUNT
       let hcMesMap = {};
       filteredData.forEach(d => {
         let key = `${d.mes}/${d.ano}`;
@@ -776,43 +717,17 @@
         type: 'line',
         data: {
           labels: labelsEvol,
-          datasets: [{
-            label: 'Headcount Total',
-            data: labelsEvol.map(l => hcMesMap[l]),
-            borderColor: '#f59e0b',
-            backgroundColor: 'rgba(245, 158, 11, 0.1)',
-            borderWidth: 3,
-            fill: true,
-            tension: 0.3,
-            pointBackgroundColor: '#b45309',
-            pointRadius: 5
-          }]
+          datasets: [{ label: 'Headcount Total', data: labelsEvol.map(l => hcMesMap[l]), borderColor: '#f59e0b', backgroundColor: 'rgba(245, 158, 11, 0.1)', fill: true }]
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            datalabels: { display: false },
-            legend: { display: false },
-            tooltip: { callbacks: { label: c => ` Total Headcount: ${c.raw} HC` } }
-          },
-          scales: {
-            y: { ticks: { callback: v => v + ' HC' } }
-          }
-        }
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
       });
     }
 
-    // 7. TABELA DE DETALHAMENTO
     function renderTable() {
       const tbody = document.getElementById('table-body');
       const search = (document.getElementById('table-search').value || '').toLowerCase();
 
-      let filtered = filteredData.filter(d => {
-        return d.area.toLowerCase().includes(search) ||
-               d.mesAno.toLowerCase().includes(search) ||
-               d.periodo.toLowerCase().includes(search);
-      });
+      let filtered = filteredData.filter(d => d.area.toLowerCase().includes(search) || d.ddd.toLowerCase().includes(search) || d.mesAno.toLowerCase().includes(search));
 
       if (filtered.length === 0) {
         tbody.innerHTML = `<tr><td colspan="9" class="p-4 text-center text-slate-400">Nenhum registro encontrado.</td></tr>`;
@@ -821,9 +736,9 @@
 
       tbody.innerHTML = filtered.map(d => `
         <tr class="hover:bg-slate-50 transition">
-          <td class="p-3 font-bold text-slate-900">${d.mesAno}</td>
+          <td class="p-3 font-bold text-slate-900">${d.mesAno.toUpperCase()}</td>
           <td class="p-3 text-slate-500 text-[11px]">${d.periodo}</td>
-          <td class="p-3 font-semibold"><span class="px-2 py-0.5 bg-slate-100 rounded border border-slate-200">Área ${d.area}</span></td>
+          <td class="p-3 font-semibold"><span class="px-2 py-0.5 bg-slate-100 rounded border border-slate-200">Área ${d.area} (DDD ${d.ddd})</span></td>
           <td class="p-3 text-center font-bold">${d.hc}</td>
           <td class="p-3 text-right">${d.h50.toFixed(1)}h</td>
           <td class="p-3 text-right">${d.h100.toFixed(1)}h</td>
