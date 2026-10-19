@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>Portal Fechamento Horas Extras | Vivo SPI v4.0</title>
+  <title>Portal Fechamento Horas Extras | Vivo SPI</title>
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -251,7 +251,7 @@
           <div class="flex items-center justify-between border-b pb-3">
             <div>
               <h2 class="text-sm font-bold text-slate-900">Top 3 Ofensores por Modalidade de Hora</h2>
-              <p class="text-xs text-slate-500">As 3 principais áreas geradoras de custo para cada tipo de hora</p>
+              <p class="text-xs text-slate-500">As 3 principais regionais geradoras de custo agrupadas por Sobreaviso, 100%, 50% e Adic. Noturno</p>
             </div>
             <span class="px-2.5 py-1 bg-rose-50 text-rose-700 text-[10px] font-bold rounded-full uppercase border border-rose-200">Top 3 por Modalidade</span>
           </div>
@@ -261,7 +261,7 @@
         </div>
       </section>
 
-      <!-- Linha 3: Áreas Ofensoras + Custo Médio por HC + Evolução Headcount -->
+      <!-- Linha 3: Áreas Ofensoras + Custo Médio por HC + Evolução Headcount (ALTURA REDUZIDA PARA h-48) -->
       <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
           <div class="flex items-center justify-between border-b pb-3">
@@ -271,7 +271,7 @@
             </div>
             <span class="px-2.5 py-1 bg-rose-50 text-rose-700 text-[10px] font-bold rounded-full uppercase border border-rose-200">Ranking Geral</span>
           </div>
-          <div class="relative h-72">
+          <div class="relative h-48">
             <canvas id="chartAreasOfensoras"></canvas>
           </div>
         </div>
@@ -284,7 +284,7 @@
             </div>
             <span class="px-2.5 py-1 bg-purple-50 text-purple-700 text-[10px] font-bold rounded-full uppercase border border-purple-200">R$/HC/Mês</span>
           </div>
-          <div class="relative h-72">
+          <div class="relative h-48">
             <canvas id="chartHCEficiencia"></canvas>
           </div>
         </div>
@@ -297,7 +297,7 @@
             </div>
             <span class="px-2.5 py-1 bg-amber-50 text-amber-700 text-[10px] font-bold rounded-full uppercase border border-amber-200">Evolução HC</span>
           </div>
-          <div class="relative h-72">
+          <div class="relative h-48">
             <canvas id="chartEvolucaoHC"></canvas>
           </div>
         </div>
@@ -552,8 +552,6 @@
       let dadosUltimoMes = filteredData.filter(d => d.mesAno === ultimoMesAno);
       let hcAtualTotal = dadosUltimoMes.reduce((acc, curr) => acc + curr.hc, 0);
 
-      // Custo Ponderado por Colaborador (R$/HC/Mês)
-      let numAreasFiltradas = [...new Set(filteredData.map(d => d.area))].length || 1;
       let hcCustoMedio = (totalCusto / numMeses) / (hcAtualTotal || 1);
 
       document.getElementById('kpi-custo-total').innerText = fmtR$(totalCusto);
@@ -618,7 +616,7 @@
         data: {
           labels: sortedAreasUltimoMes.map(a => `Área ${a}`),
           datasets: [{
-            label: 'Custo no Mês',
+            label: 'Custo',
             data: valoresUltimoMes,
             backgroundColor: bgColorsMes,
             borderRadius: 6
@@ -645,6 +643,7 @@
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
       });
 
+      // GRÁFICO TOP 3 REGIONAIS POR MODALIDADE (Horas 50%, Horas 100%, Sobreaviso, Adic. Noturno)
       let modalidadeOfensores = { 'Horas 50%': {}, 'Horas 100%': {}, 'Sobreaviso': {}, 'Adic. Noturno': {} };
       filteredData.forEach(d => {
         modalidadeOfensores['Horas 50%'][d.area] = (modalidadeOfensores['Horas 50%'][d.area] || 0) + d.h50;
@@ -655,12 +654,18 @@
 
       let modalitiesList = ['Horas 50%', 'Horas 100%', 'Sobreaviso', 'Adic. Noturno'];
       let top1Data = [], top2Data = [], top3Data = [];
+      let top1Names = [], top2Names = [], top3Names = [];
 
       modalitiesList.forEach(m => {
         let sorted = Object.keys(modalidadeOfensores[m]).sort((a,b) => modalidadeOfensores[m][b] - modalidadeOfensores[m][a]);
         top1Data.push(sorted[0] ? modalidadeOfensores[m][sorted[0]] : 0);
+        top1Names.push(sorted[0] ? `Área ${sorted[0]}` : '--');
+
         top2Data.push(sorted[1] ? modalidadeOfensores[m][sorted[1]] : 0);
+        top2Names.push(sorted[1] ? `Área ${sorted[1]}` : '--');
+
         top3Data.push(sorted[2] ? modalidadeOfensores[m][sorted[2]] : 0);
+        top3Names.push(sorted[2] ? `Área ${sorted[2]}` : '--');
       });
 
       const ctxTop3 = document.getElementById('chartTop3Modalidades').getContext('2d');
@@ -669,12 +674,26 @@
         data: {
           labels: modalitiesList,
           datasets: [
-            { label: '1º Maior Ofensor', data: top1Data, backgroundColor: '#e11d48' },
-            { label: '2º Maior Ofensor', data: top2Data, backgroundColor: '#f97316' },
-            { label: '3º Maior Ofensor', data: top3Data, backgroundColor: '#eab308' }
+            { label: '1ª Maior Regional Ofensora', data: top1Data, backgroundColor: '#e11d48', areaNames: top1Names },
+            { label: '2ª Maior Regional Ofensora', data: top2Data, backgroundColor: '#f97316', areaNames: top2Names },
+            { label: '3ª Maior Regional Ofensora', data: top3Data, backgroundColor: '#eab308', areaNames: top3Names }
           ]
         },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } },
+            tooltip: {
+              callbacks: {
+                label: function(c) {
+                  let areaName = c.dataset.areaNames ? c.dataset.areaNames[c.dataIndex] : '';
+                  return ` ${c.dataset.label} (${areaName}): ${c.raw.toFixed(1)} Horas`;
+                }
+              }
+            }
+          }
+        }
       });
 
       let areaCustoMap = {};
@@ -713,6 +732,7 @@
         hcMesMap[key] = (hcMesMap[key] || 0) + d.hc;
       });
 
+      // EVOLUÇÃO DE HEADCOUNT COM EIXO Y COMENÇANDO EM 200
       const ctxHCEvol = document.getElementById('chartEvolucaoHC').getContext('2d');
       chartInstances.evolucaoHC = new Chart(ctxHCEvol, {
         type: 'line',
@@ -720,7 +740,17 @@
           labels: labelsEvol,
           datasets: [{ label: 'Headcount Total', data: labelsEvol.map(l => hcMesMap[l]), borderColor: '#f59e0b', backgroundColor: 'rgba(245, 158, 11, 0.1)', fill: true }]
         },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: {
+              min: 200,
+              ticks: { callback: v => v + ' HC' }
+            }
+          }
+        }
       });
     }
 
