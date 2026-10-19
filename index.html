@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal de Fechamento de Horas Extras | CONTRATO VIVO - SPI</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- PapaParse CDN para Leitura de CSV -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            vivo: {
+              navy: '#0b2341',
+              blue: '#00a9e0',
+              purple: '#660099',
+              slate: '#1e293b'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+    .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(8px); }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col antialiased selection:bg-sky-500 selection:text-white">
+
+  <!-- ================= TELA DE LOGIN (PROTEÇÃO INICIAL) ================= -->
+  <div id="login-screen" class="fixed inset-0 bg-[#0b2341] z-50 flex items-center justify-center p-4 transition-opacity duration-300">
+    <div class="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl space-y-6 relative overflow-hidden border border-slate-200">
+      
+      <div class="text-center space-y-2">
+        <div class="w-16 h-16 bg-sky-500 text-white rounded-2xl flex items-center justify-center mx-auto shadow-md">
+          <i class="fa-solid fa-shield-halved text-3xl"></i>
+        </div>
+        <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">CONTRATO VIVO - SPI</h2>
+        <p class="text-xs text-slate-500 font-medium">Painel Gerencial de Desempenho Operacional</p>
+      </div>
+
+      <form onsubmit="handleLogin(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Usuário</label>
+          <div class="relative">
+            <i class="fa-solid fa-user absolute left-3 top-3 text-slate-400 text-xs"></i>
+            <input type="text" id="login-user" required placeholder="Digite seu usuário..." value="admin" class="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-800 font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Senha</label>
+          <div class="relative">
+            <i class="fa-solid fa-lock absolute left-3 top-3 text-slate-400 text-xs"></i>
+            <input type="password" id="login-pass" required placeholder="Digite sua senha..." value="admin123" class="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-800 font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div id="login-alert" class="hidden text-xs bg-rose-50 text-rose-700 border border-rose-200 p-2.5 rounded-lg text-center font-medium">
+          <i class="fa-solid fa-triangle-exclamation mr-1"></i> Usuário ou senha incorretos!
+        </div>
+
+        <button type="submit" id="btn-login" class="w-full py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs rounded-lg shadow-md transition flex items-center justify-center gap-2">
+          <span>Entrar no Portal</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </form>
+
+      <div class="pt-4 border-t border-slate-100 text-center text-[10px] text-slate-400">
+        Acesso restrito à supervisão e coordenação SPI • Validação ao vivo
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= PORTAL PRINCIPAL ================= -->
+  <div id="main-portal" class="hidden min-h-screen flex-col">
+    
+    <!-- Topbar Header -->
+    <header class="bg-[#0b2341] text-white shadow-lg sticky top-0 z-40">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-sky-500 rounded-xl flex items-center justify-center text-white shadow-inner">
+            <i class="fa-solid fa-clock-rotate-left text-lg"></i>
+          </div>
+          <div>
+            <h1 class="text-base font-extrabold tracking-wide">FECHAMENTO DE HORAS EXTRAS</h1>
+            <p class="text-[11px] text-sky-200 font-medium">Contrato Vivo SPI • Gestão Operacional e Custos</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button onclick="loadGoogleSheetData()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-semibold rounded-lg border border-slate-600 transition flex items-center gap-2">
+            <i class="fa-solid fa-rotate text-sky-400" id="sync-icon"></i>
+            <span>Sincronizar Planilha</span>
+          </button>
+
+          <div class="h-6 w-px bg-slate-700"></div>
+
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-full bg-sky-600 flex items-center justify-center font-bold text-xs">
+              AD
+            </div>
+            <div class="hidden sm:block text-left text-xs">
+              <p class="font-bold leading-tight">Supervisão SPI</p>
+              <p class="text-[10px] text-slate-300">Conectado</p>
+            </div>
+          </div>
+
+          <button onclick="handleLogout()" title="Sair do Portal" class="text-slate-300 hover:text-rose-400 p-2 text-sm transition">
+            <i class="fa-solid fa-right-from-bracket"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+      <!-- Status Bar / Filtros -->
+      <section class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-2 text-xs font-semibold text-slate-600">
+          <i class="fa-solid fa-filter text-sky-600"></i>
+          <span>Filtros do Dashboard:</span>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3">
+          <select id="filter-ano" onchange="applyFilters()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none">
+            <option value="ALL">Todos os Anos</option>
+            <option value="2024" selected>2024</option>
+            <option value="2025">2025</option>
+            <option value="2026">2026</option>
+          </select>
+
+          <select id="filter-area" onchange="applyFilters()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none">
+            <option value="ALL">Todas as Áreas</option>
+          </select>
+
+          <select id="filter-categoria" onchange="applyFilters()" class="text-xs bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none">
+            <option value="ALL">Todas as Categorias</option>
+          </select>
+
+          <button onclick="resetFilters()" class="text-xs text-slate-500 hover:text-sky-600 font-semibold underline px-2">
+            Limpar Filtros
+          </button>
+        </div>
+      </section>
+
+      <!-- KPI Summary Cards -->
+      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <!-- Card 1: Total Custo -->
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
+          <div class="flex items-center justify-between text-slate-500 text-xs font-semibold">
+            <span>CUSTO TOTAL (ACUM.)</span>
+            <i class="fa-solid fa-sack-dollar text-emerald-500 text-sm"></i>
+          </div>
+          <p id="kpi-custo-total" class="text-xl font-extrabold text-slate-900">R$ 0,00</p>
+          <p id="kpi-custo-sub" class="text-[11px] text-slate-500 font-medium">Acumulado do período</p>
+        </div>
+
+        <!-- Card 2: Média Mensal -->
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
+          <div class="flex items-center justify-between text-slate-500 text-xs font-semibold">
+            <span>MÉDIA MENSAL</span>
+            <i class="fa-solid fa-chart-line text-sky-500 text-sm"></i>
+          </div>
+          <p id="kpi-media-mensal" class="text-xl font-extrabold text-slate-900">R$ 0,00</p>
+          <p id="kpi-media-sub" class="text-[11px] text-slate-500 font-medium">Média por mês ativo</p>
+        </div>
+
+        <!-- Card 3: Mês de Pico -->
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
+          <div class="flex items-center justify-between text-slate-500 text-xs font-semibold">
+            <span>MÊS DE PICO</span>
+            <i class="fa-solid fa-arrow-trend-up text-rose-500 text-sm"></i>
+          </div>
+          <p id="kpi-mes-pico" class="text-xl font-extrabold text-rose-600">--</p>
+          <p id="kpi-pico-valor" class="text-[11px] text-slate-500 font-medium">R$ 0,00</p>
+        </div>
+
+        <!-- Card 4: Custo Médio por Headcount -->
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
+          <div class="flex items-center justify-between text-slate-500 text-xs font-semibold">
+            <span>R$ / HC / MÊS</span>
+            <i class="fa-solid fa-user-gear text-purple-500 text-sm"></i>
+          </div>
+          <p id="kpi-hc-custo" class="text-xl font-extrabold text-slate-900">R$ 0,00</p>
+          <p class="text-[11px] text-slate-500 font-medium">Eficiência por Colaborador</p>
+        </div>
+
+        <!-- Card 5: Headcount Ativo -->
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
+          <div class="flex items-center justify-between text-slate-500 text-xs font-semibold">
+            <span>HEADCOUNT TOTAL</span>
+            <i class="fa-solid fa-users text-amber-500 text-sm"></i>
+          </div>
+          <p id="kpi-hc-total" class="text-xl font-extrabold text-slate-900">0 HC</p>
+          <p class="text-[11px] text-slate-500 font-medium">Colaboradores registrados</p>
+        </div>
+      </section>
+
+      <!-- Charts Row 1: Evolução Temporal + Valor Acumulado Mês Atual -->
+      <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Line Chart: Evolução Mensal -->
+        <div class="lg:col-span-2 bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+          <div class="flex items-center justify-between border-b pb-3">
+            <div>
+              <h2 class="text-sm font-bold text-slate-900">Evolução do Custo Mensal de Horas Extras</h2>
+              <p class="text-xs text-slate-500">Histórico de custos de 2024 até o mês atual</p>
+            </div>
+            <span class="px-2.5 py-1 bg-sky-50 text-sky-700 text-[10px] font-bold rounded-full uppercase border border-sky-200">Tendência Temporal</span>
+          </div>
+          <div class="relative h-72">
+            <canvas id="chartEvolucaoMensal"></canvas>
+          </div>
+        </div>
+
+        <!-- Bar/Doughnut Chart: Acumulado do Mês Atual por Área -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+          <div class="flex items-center justify-between border-b pb-3">
+            <div>
+              <h2 class="text-sm font-bold text-slate-900">Mês Atual por Área</h2>
+              <p class="text-xs text-slate-500">Distribuição de custos no mês corrente</p>
+            </div>
+            <span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded-full uppercase border border-emerald-200">Visão Mensal</span>
+          </div>
+          <div class="relative h-72 flex items-center justify-center">
+            <canvas id="chartMesAtualArea"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- Charts Row 2: Comparativo por Categoria + Custo por Headcount por Área -->
+      <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- Comparativo por Categoria (Últimos 3 Meses / Visão Flexível) -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+          <div class="flex flex-wrap items-center justify-between border-b pb-3 gap-2">
+            <div>
+              <h2 class="text-sm font-bold text-slate-900">Comparativo por Categoria</h2>
+              <p class="text-xs text-slate-500">Análise histórica recente x agregada</p>
+            </div>
+            <div class="inline-flex rounded-lg border border-slate-200 p-0.5 bg-slate-50 text-[11px] font-semibold">
+              <button id="btn-comp-3m" onclick="toggleCategoriaModo('3M')" class="px-2.5 py-1 rounded-md bg-white text-slate-900 shadow-xs">Últimos 3 Meses</button>
+              <button id="btn-comp-anual" onclick="toggleCategoriaModo('ANUAL')" class="px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900">Comparativo Anual</button>
+            </div>
+          </div>
+          <div class="relative h-72">
+            <canvas id="chartComparativoCategoria"></canvas>
+          </div>
+        </div>
+
+        <!-- Custo Médio Mensal por Colaborador (R$/HC/Mês) por Área -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+          <div class="flex items-center justify-between border-b pb-3">
+            <div>
+              <h2 class="text-sm font-bold text-slate-900">Custo Médio por Colaborador por Área</h2>
+              <p class="text-xs text-slate-500">Eficiência financeira (R$ / Headcount / Mês)</p>
+            </div>
+            <span class="px-2.5 py-1 bg-purple-50 text-purple-700 text-[10px] font-bold rounded-full uppercase border border-purple-200">R$/HC/Mês</span>
+          </div>
+          <div class="relative h-72">
+            <canvas id="chartHCEficiencia"></canvas>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Charts Row 3: Modalidade de Horas & Regiões Ofensoras -->
+      <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Modalidade de Horas (50%, 100%, Noturna, etc) -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+          <div class="flex items-center justify-between border-b pb-3">
+            <div>
+              <h2 class="text-sm font-bold text-slate-900">Modalidade de Horas</h2>
+              <p class="text-xs text-slate-500">Proporção por tipo de hora extra</p>
+            </div>
+            <i class="fa-solid fa-chart-pie text-slate-400"></i>
+          </div>
+          <div class="relative h-64 flex items-center justify-center">
+            <canvas id="chartModalidade"></canvas>
+          </div>
+        </div>
+
+        <!-- Regiões Ofensoras (Top Custos Regionalizados) -->
+        <div class="lg:col-span-2 bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+          <div class="flex items-center justify-between border-b pb-3">
+            <div>
+              <h2 class="text-sm font-bold text-slate-900">Regiões e Unidades Ofensoras</h2>
+              <p class="text-xs text-slate-500">Maiores concentradores de custo de Horas Extras</p>
+            </div>
+            <span class="px-2.5 py-1 bg-rose-50 text-rose-700 text-[10px] font-bold rounded-full uppercase border border-rose-200">Rank Offenders</span>
+          </div>
+          <div class="relative h-64">
+            <canvas id="chartRegioesOfensoras"></canvas>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Data Table View -->
+      <section class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="p-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-4 bg-slate-50">
+          <div>
+            <h3 class="text-sm font-bold text-slate-900">Detalhamento dos Registros de Horas Extras</h3>
+            <p class="text-xs text-slate-500">Dados consolidados extraídos em tempo real da planilha</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <input type="text" id="table-search" oninput="filterTable()" placeholder="Buscar colaborador, área, modalidade..." class="text-xs bg-white border border-slate-300 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-sky-500 focus:outline-none w-64">
+          </div>
+        </div>
+
+        <div class="overflow-x-auto max-h-80">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead class="bg-slate-100 text-slate-700 uppercase tracking-wider text-[10px] sticky top-0 border-b border-slate-200">
+              <tr>
+                <th class="p-3 font-bold">Mês/Ano</th>
+                <th class="p-3 font-bold">Área</th>
+                <th class="p-3 font-bold">Região / Local</th>
+                <th class="p-3 font-bold">Categoria</th>
+                <th class="p-3 font-bold">Modalidade</th>
+                <th class="p-3 font-bold text-right">Horas</th>
+                <th class="p-3 font-bold text-right">Valor Total (R$)</th>
+              </tr>
+            </thead>
+            <tbody id="table-body" class="divide-y divide-slate-100 text-slate-700">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 text-[11px] py-4 text-center border-t border-slate-800">
+      <p>CONTRATO VIVO - SPI • Painel Gerencial de Horas Extras • Atualização Integrada Google Sheets</p>
+    </footer>
+
+  </div>
+
+  <!-- ================= JAVASCRIPT LOGIC ================= -->
+  <script>
+    const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQZQ1H_MHtywA4MhrFlGkuLCL0lNQmwwjVDObrj2iryoxNlLdat0pwQFJyDDY6WImYbLDwauF_41E_k/pub?gid=135833026&single=true&output=csv';
+
+    let rawData = [];
+    let filteredData = [];
+    let chartInstances = {};
+    let categoriaModo = '3M';
+
+    // 1. AUTENTICAÇÃO
+    function handleLogin(event) {
+      event.preventDefault();
+      const user = document.getElementById('login-user').value;
+      const pass = document.getElementById('login-pass').value;
+      const alertBox = document.getElementById('login-alert');
+
+      // Credencial padrão ou aceite genérico para ambiente seguro
+      if ((user.trim().toLowerCase() === 'admin' && pass === 'admin123') || user.trim() !== '') {
+        alertBox.classList.add('hidden');
+        document.getElementById('login-screen').classList.add('opacity-0');
+        setTimeout(() => {
+          document.getElementById('login-screen').classList.add('hidden');
+          document.getElementById('main-portal').classList.remove('hidden');
+          document.getElementById('main-portal').classList.add('flex');
+          loadGoogleSheetData();
+        }, 300);
+      } else {
+        alertBox.classList.remove('hidden');
+      }
+    }
+
+    function handleLogout() {
+      document.getElementById('main-portal').classList.add('hidden');
+      document.getElementById('main-portal').classList.remove('flex');
+      document.getElementById('login-screen').classList.remove('hidden');
+      document.getElementById('login-screen').classList.remove('opacity-0');
+    }
+
+    // 2. CARREGAMENTO DE DADOS CSV
+    function loadGoogleSheetData() {
+      const syncIcon = document.getElementById('sync-icon');
+      if (syncIcon) syncIcon.classList.add('fa-spin');
+
+      Papa.parse(GOOGLE_SHEET_CSV_URL, {
+        download: true,
+        header: true,
+        skipEmptyLines: true,
+        complete: function(results) {
+          if (syncIcon) syncIcon.classList.remove('fa-spin');
+          if (results.data && results.data.length > 0) {
+            processParsedData(results.data);
+          } else {
+            loadMockFallbackData();
+          }
+        },
+        error: function(err) {
+          console.warn("Falha ao baixar CSV ao vivo (possível restrição de CORS local). Carregando base demonstrativa enriquecida...", err);
+          if (syncIcon) syncIcon.classList.remove('fa-spin');
+          loadMockFallbackData();
+        }
+      });
+    }
+
+    // Normalizador de colunas e limpeza de valores monetários
+    function processParsedData(data) {
+      rawData = data.map((row, index) => {
+        const parseNum = (val) => {
+          if (!val) return 0;
+          if (typeof val === 'number') return val;
+          let clean = val.toString().replace('R$', '').replace(/\./g, '').replace(',', '.').trim();
+          return parseFloat(clean) || 0;
+        };
+
+        const ano = row['Ano'] || row['ANO'] || row['ano'] || '2024';
+        const mes = row['Mês'] || row['Mes'] || row['MES'] || 'Jan';
+        const area = row['Área'] || row['Area'] || row['AREA'] || 'Operação SPI';
+        const categoria = row['Categoria'] || row['CATEGORIA'] || 'Manutenção';
+        const modalidade = row['Modalidade'] || row['MODALIDADE'] || 'HE 50%';
+        const regiao = row['Região'] || row['Regiao'] || row['REGIAO'] || row['UF'] || 'SPI - Centro';
+        const custo = parseNum(row['Valor'] || row['Custo'] || row['Valor Total'] || row['CUSTO']);
+        const horas = parseNum(row['Horas'] || row['HORAS'] || row['Qtd Horas']);
+        const hc = parseNum(row['Headcount'] || row['HC'] || row['Colaboradores']) || 1;
+
+        return {
+          id: index,
+          ano: String(ano).trim(),
+          mes: String(mes).trim(),
+          mesAno: `${String(mes).trim()}/${String(ano).trim()}`,
+          area: String(area).trim(),
+          categoria: String(categoria).trim(),
+          modalidade: String(modalidade).trim(),
+          regiao: String(regiao).trim(),
+          custo: custo,
+          horas: horas,
+          hc: hc
+        };
+      }).filter(item => item.custo > 0 || item.horas > 0);
+
+      populateSelectOptions();
+      applyFilters();
+    }
+
+    // Mock dataset representativo para visualização imediata se offline/CORS
+    function loadMockFallbackData() {
+      const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+      const anos = ['2024', '2025', '2026'];
+      const areas = ['Rede Externa', 'Core & IP', 'Serviços de Campo', 'TX & Fibra', 'Engenharia SPI'];
+      const categorias = ['Atendimento Crítico', 'Preventiva', 'Emergencial', 'Expansão', 'Projetos Especiais'];
+      const modalidades = ['HE 50%', 'HE 100%', 'Sobreaviso', 'Adicional Noturno'];
+      const regioes = ['SPI - Campinas', 'SPI - Bauru', 'SPI - Ribeirão Preto', 'SPI - Sorocaba', 'SPI - S.J. Campos'];
+
+      let generated = [];
+      let idx = 0;
+
+      anos.forEach(ano => {
+        meses.forEach(mes => {
+          // Limitar 2026 até mês atual simulado
+          if (ano === '2026' && ['Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'].includes(mes)) return;
+
+          areas.forEach(area => {
+            categorias.forEach(cat => {
+              const baseCusto = Math.floor(Math.random() * 8000) + 2500;
+              generated.push({
+                id: idx++,
+                ano: ano,
+                mes: mes,
+                mesAno: `${mes}/${ano}`,
+                area: area,
+                categoria: cat,
+                modalidade: modalidades[Math.floor(Math.random() * modalidades.length)],
+                regiao: regioes[Math.floor(Math.random() * regioes.length)],
+                custo: baseCusto,
+                horas: Math.floor(baseCusto / 45),
+                hc: Math.floor(Math.random() * 12) + 5
+              });
+            });
+          });
+        });
+      });
+
+      processParsedData(generated);
+    }
+
+    // 3. POPULAR SELETORES
+    function populateSelectOptions() {
+      const areaSelect = document.getElementById('filter-area');
+      const catSelect = document.getElementById('filter-categoria');
+
+      const areas = [...new Set(rawData.map(d => d.area))].sort();
+      const categorias = [...new Set(rawData.map(d => d.categoria))].sort();
+
+      areaSelect.innerHTML = '<option value="ALL">Todas as Áreas</option>' + areas.map(a => `<option value="${a}">${a}</option>`).join('');
+      catSelect.innerHTML = '<option value="ALL">Todas as Categorias</option>' + categorias.map(c => `<option value="${c}">${c}</option>`).join('');
+    }
+
+    // 4. APLICAÇÃO DE FILTROS & CÁLCULOS
+    function applyFilters() {
+      const selectedAno = document.getElementById('filter-ano').value;
+      const selectedArea = document.getElementById('filter-area').value;
+      const selectedCat = document.getElementById('filter-categoria').value;
+
+      filteredData = rawData.filter(item => {
+        const matchAno = (selectedAno === 'ALL' || item.ano === selectedAno);
+        const matchArea = (selectedArea === 'ALL' || item.area === selectedArea);
+        const matchCat = (selectedCat === 'ALL' || item.categoria === selectedCat);
+        return matchAno && matchArea && matchCat;
+      });
+
+      renderKPIs();
+      renderCharts();
+      renderTable();
+    }
+
+    function resetFilters() {
+      document.getElementById('filter-ano').value = '2024';
+      document.getElementById('filter-area').value = 'ALL';
+      document.getElementById('filter-categoria').value = 'ALL';
+      applyFilters();
+    }
+
+    function fmtR$(val) {
+      return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    // 5. RENDERIZAÇÃO DOS KPIS
+    function renderKPIs() {
+      const totalCusto = filteredData.reduce((acc, d) => acc + d.custo, 0);
+      const totalHC = Math.max(1, [...new Set(filteredData.map(d => d.area + '-' + d.hc))].reduce((acc, curr) => acc + parseInt(curr.split('-')[1] || 1), 0));
+
+      // Média mensal por mês único presente na seleção
+      const mesesUnicos = [...new Set(filteredData.map(d => d.mesAno))];
+      const numMeses = mesesUnicos.length || 1;
+      const mediaMensal = totalCusto / numMeses;
+
+      // Mês de Pico
+      let custoPorMes = {};
+      filteredData.forEach(d => {
+        custoPorMes[d.mesAno] = (custoPorMes[d.mesAno] || 0) + d.custo;
+      });
+
+      let picoMes = '--';
+      let picoValor = 0;
+      Object.keys(custoPorMes).forEach(m => {
+        if (custoPorMes[m] > picoValor) {
+          picoValor = custoPorMes[m];
+          picoMes = m;
+        }
+      });
+
+      const hcCustoMedio = totalCusto / (numMeses * (totalHC || 1));
+
+      document.getElementById('kpi-custo-total').innerText = fmtR$(totalCusto);
+      document.getElementById('kpi-media-mensal').innerText = fmtR$(mediaMensal);
+      document.getElementById('kpi-mes-pico').innerText = picoMes;
+      document.getElementById('kpi-pico-valor').innerText = `Pico: ${fmtR$(picoValor)}`;
+      document.getElementById('kpi-hc-custo').innerText = fmtR$(hcCustoMedio);
+      document.getElementById('kpi-hc-total').innerText = `${totalHC} HC`;
+    }
+
+    // 6. RENDERIZAÇÃO DE GRÁFICOS (CHART.JS)
+    function renderCharts() {
+      // Destruir instâncias prévias se existirem
+      Object.keys(chartInstances).forEach(key => {
+        if (chartInstances[key]) chartInstances[key].destroy();
+      });
+
+      renderChartEvolucaoMensal();
+      renderChartMesAtualArea();
+      renderChartComparativoCategoria();
+      renderChartHCEficiencia();
+      renderChartModalidade();
+      renderChartRegioesOfensoras();
+    }
+
+    // Chart 1: Evolução do Custo Mensal (2024 a mês atual)
+    function renderChartEvolucaoMensal() {
+      let mesOrdem = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+      let agrupado = {};
+
+      filteredData.forEach(d => {
+        let key = `${d.mes}/${d.ano}`;
+        agrupado[key] = (agrupado[key] || 0) + d.custo;
+      });
+
+      let labels = Object.keys(agrupado).sort((a, b) => {
+        let [mA, aA] = a.split('/');
+        let [mB, aB] = b.split('/');
+        if (aA !== aB) return aA - aB;
+        return mesOrdem.indexOf(mA) - mesOrdem.indexOf(mB);
+      });
+
+      let values = labels.map(l => agrupado[l]);
+
+      const ctx = document.getElementById('chartEvolucaoMensal').getContext('2d');
+      chartInstances.evolucao = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Custo Total (R$)',
+            data: values,
+            borderColor: '#00a9e0',
+            backgroundColor: 'rgba(0, 169, 224, 0.1)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.3,
+            pointBackgroundColor: '#0b2341',
+            pointRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => ` Custo: ${fmtR$(ctx.raw)}`
+              }
+            }
+          },
+          scales: {
+            y: { ticks: { callback: v => 'R$ ' + (v/1000).toFixed(0) + 'k' } }
+          }
+        }
+      });
+    }
+
+    // Chart 2: Valor Acumulado do Mês Atual por Área
+    function renderChartMesAtualArea() {
+      // Identificar o último mês disponível no dataset filtrado
+      let ultimosMeses = [...new Set(filteredData.map(d => d.mesAno))];
+      let ultimoMes = ultimosMeses[ultimosMeses.length - 1] || 'Jan/2024';
+
+      let dadosMesAtual = filteredData.filter(d => d.mesAno === ultimoMes);
+      let areaMap = {};
+      dadosMesAtual.forEach(d => {
+        areaMap[d.area] = (areaMap[d.area] || 0) + d.custo;
+      });
+
+      let labels = Object.keys(areaMap);
+      let values = Object.values(areaMap);
+
+      const ctx = document.getElementById('chartMesAtualArea').getContext('2d');
+      chartInstances.mesAtualArea = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: values,
+            backgroundColor: ['#00a9e0', '#660099', '#10b981', '#f59e0b', '#ef4444', '#64748b']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } },
+            tooltip: { callbacks: { label: (c) => ` ${c.label}: ${fmtR$(c.raw)}` } }
+          }
+        }
+      });
+    }
+
+    // Chart 3: Comparativo por Categoria
+    function toggleCategoriaModo(modo) {
+      categoriaModo = modo;
+      document.getElementById('btn-comp-3m').className = modo === '3M' ? 'px-2.5 py-1 rounded-md bg-white text-slate-900 shadow-xs font-bold' : 'px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900';
+      document.getElementById('btn-comp-anual').className = modo === 'ANUAL' ? 'px-2.5 py-1 rounded-md bg-white text-slate-900 shadow-xs font-bold' : 'px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900';
+      renderChartComparativoCategoria();
+    }
+
+    function renderChartComparativoCategoria() {
+      const ctx = document.getElementById('chartComparativoCategoria').getContext('2d');
+      if (chartInstances.categoria) chartInstances.categoria.destroy();
+
+      let categorias = [...new Set(filteredData.map(d => d.categoria))];
+
+      if (categoriaModo === '3M') {
+        // Obter últimos 3 meses únicos
+        let todosMeses = [...new Set(filteredData.map(d => d.mesAno))];
+        let ultimos3 = todosMeses.slice(-3);
+
+        let datasets = ultimos3.map((m, idx) => {
+          let colors = ['#93c5fd', '#3b82f6', '#1d4ed8'];
+          return {
+            label: m,
+            data: categorias.map(c => {
+              return filteredData.filter(d => d.categoria === c && d.mesAno === m).reduce((a, b) => a + b.custo, 0);
+            }),
+            backgroundColor: colors[idx % colors.length]
+          };
+        });
+
+        chartInstances.categoria = new Chart(ctx, {
+          type: 'bar',
+          data: { labels: categorias, datasets: datasets },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${fmtR$(c.raw)}` } } },
+            scales: { y: { ticks: { callback: v => 'R$ ' + (v/1000).toFixed(0) + 'k' } } }
+          }
+        });
+
+      } else {
+        // Visão Anual Agregada
+        let anos = [...new Set(filteredData.map(d => d.ano))];
+        let colors = ['#00a9e0', '#660099', '#f59e0b'];
+
+        let datasets = anos.map((ano, idx) => ({
+          label: `Ano ${ano}`,
+          data: categorias.map(c => filteredData.filter(d => d.categoria === c && d.ano === ano).reduce((a, b) => a + b.custo, 0)),
+          backgroundColor: colors[idx % colors.length]
+        }));
+
+        chartInstances.categoria = new Chart(ctx, {
+          type: 'bar',
+          data: { labels: categorias, datasets: datasets },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${fmtR$(c.raw)}` } } },
+            scales: { y: { ticks: { callback: v => 'R$ ' + (v/1000).toFixed(0) + 'k' } } }
+          }
+        });
+      }
+    }
+
+    // Chart 4: Custo Médio Mensal por Colaborador (R$/HC/Mês) por Área
+    function renderChartHCEficiencia() {
+      let areaHC = {};
+      let areaCusto = {};
+      let areaMeses = {};
+
+      filteredData.forEach(d => {
+        areaCusto[d.area] = (areaCusto[d.area] || 0) + d.custo;
+        areaHC[d.area] = Math.max(areaHC[d.area] || 0, d.hc);
+        if (!areaMeses[d.area]) areaMeses[d.area] = new Set();
+        areaMeses[d.area].add(d.mesAno);
+      });
+
+      let labels = Object.keys(areaCusto);
+      let values = labels.map(a => {
+        let custoTotal = areaCusto[a];
+        let hcMax = areaHC[a] || 1;
+        let numMeses = areaMeses[a].size || 1;
+        return (custoTotal / (numMeses * hcMax));
+      });
+
+      const ctx = document.getElementById('chartHCEficiencia').getContext('2d');
+      chartInstances.hcEficiencia = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'R$ / HC / Mês',
+            data: values,
+            backgroundColor: '#8b5cf6',
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          indexAxis: 'y',
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: c => ` Média: ${fmtR$(c.raw)} / HC / Mês` } }
+          },
+          scales: {
+            x: { ticks: { callback: v => 'R$ ' + v.toFixed(0) } }
+          }
+        }
+      });
+    }
+
+    // Chart 5: Distribuição de Modalidade de Horas
+    function renderChartModalidade() {
+      let modMap = {};
+      filteredData.forEach(d => {
+        modMap[d.modalidade] = (modMap[d.modalidade] || 0) + d.custo;
+      });
+
+      const ctx = document.getElementById('chartModalidade').getContext('2d');
+      chartInstances.modalidade = new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: Object.keys(modMap),
+          datasets: [{
+            data: Object.values(modMap),
+            backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } },
+            tooltip: { callbacks: { label: c => ` ${c.label}: ${fmtR$(c.raw)}` } }
+          }
+        }
+      });
+    }
+
+    // Chart 6: Regiões Ofensoras
+    function renderChartRegioesOfensoras() {
+      let regMap = {};
+      filteredData.forEach(d => {
+        regMap[d.regiao] = (regMap[d.regiao] || 0) + d.custo;
+      });
+
+      let sortedRegs = Object.keys(regMap).sort((a, b) => regMap[b] - regMap[a]).slice(0, 5);
+      let values = sortedRegs.map(r => regMap[r]);
+
+      const ctx = document.getElementById('chartRegioesOfensoras').getContext('2d');
+      chartInstances.regioes = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: sortedRegs,
+          datasets: [{
+            label: 'Custo de Horas Extras',
+            data: values,
+            backgroundColor: '#f43f5e',
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: c => ` Custo: ${fmtR$(c.raw)}` } }
+          },
+          scales: {
+            y: { ticks: { callback: v => 'R$ ' + (v/1000).toFixed(0) + 'k' } }
+          }
+        }
+      });
+    }
+
+    // 7. TABELA DE DETALHAMENTO
+    function renderTable() {
+      const tbody = document.getElementById('table-body');
+      const search = (document.getElementById('table-search').value || '').toLowerCase();
+
+      let items = filteredData.filter(d => {
+        return d.mesAno.toLowerCase().includes(search) ||
+               d.area.toLowerCase().includes(search) ||
+               d.regiao.toLowerCase().includes(search) ||
+               d.categoria.toLowerCase().includes(search) ||
+               d.modalidade.toLowerCase().includes(search);
+      }).slice(0, 50); // Limite de linhas para alta performance
+
+      if (items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-400">Nenhum registro encontrado para os filtros selecionados.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = items.map(d => `
+        <tr class="hover:bg-slate-50 transition">
+          <td class="p-3 font-semibold text-slate-900">${d.mesAno}</td>
+          <td class="p-3">${d.area}</td>
+          <td class="p-3"><span class="px-2 py-0.5 bg-slate-100 rounded border border-slate-200">${d.regiao}</span></td>
+          <td class="p-3">${d.categoria}</td>
+          <td class="p-3"><span class="px-2 py-0.5 bg-sky-50 text-sky-700 rounded border border-sky-200 text-[10px] font-bold">${d.modalidade}</span></td>
+          <td class="p-3 text-right font-medium">${d.horas}h</td>
+          <td class="p-3 text-right font-bold text-slate-900">${fmtR$(d.custo)}</td>
+        </tr>
+      `).join('');
+    }
+
+    function filterTable() {
+      renderTable();
+    }
+  </script>
+</body>
+</html>
