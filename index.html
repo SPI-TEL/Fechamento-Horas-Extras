@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>Portal Fechamento Horas Extras | Vivo SPI</title>
+  <title>Portal Fechamento Horas Extras | Vivo SPI v4.0</title>
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -553,16 +553,14 @@
       let hcAtualTotal = dadosUltimoMes.reduce((acc, curr) => acc + curr.hc, 0);
 
       // Custo Ponderado por Colaborador (R$/HC/Mês)
-      let hcTotalSum = filteredData.reduce((a, b) => a + b.hc, 0);
-      let totalFechamentos = filteredData.length || 1;
-      let hcMedioOperacional = hcTotalSum / totalFechamentos || 1;
-      let hcCustoMedio = (totalCusto / numMeses) / (hcMedioOperacional / (filteredData.map(d=>d.area).filter((v,i,a)=>a.indexOf(v)===i).length || 1));
+      let numAreasFiltradas = [...new Set(filteredData.map(d => d.area))].length || 1;
+      let hcCustoMedio = (totalCusto / numMeses) / (hcAtualTotal || 1);
 
       document.getElementById('kpi-custo-total').innerText = fmtR$(totalCusto);
       document.getElementById('kpi-media-mensal').innerText = fmtR$(mediaMensal);
       document.getElementById('kpi-mes-pico').innerText = picoMes;
       document.getElementById('kpi-pico-valor').innerText = `Pico: ${fmtR$(picoValor)}`;
-      document.getElementById('kpi-hc-custo').innerText = fmtR$(hcCustoMedio || (totalCusto / (numMeses * (hcAtualTotal || 1))));
+      document.getElementById('kpi-hc-custo').innerText = fmtR$(hcCustoMedio || 0);
       document.getElementById('kpi-hc-total').innerText = `${hcAtualTotal} HC`;
       document.getElementById('kpi-hc-sub').innerText = `Mês: ${ultimoMesAno}`;
     }
@@ -591,7 +589,7 @@
         data: {
           labels: labelsEvol,
           datasets: [{
-            label: 'Custo Total (R$)',
+            label: 'Custo Total',
             data: labelsEvol.map(l => mesMap[l]),
             borderColor: '#00a9e0',
             backgroundColor: 'rgba(0, 169, 224, 0.1)',
@@ -620,7 +618,7 @@
         data: {
           labels: sortedAreasUltimoMes.map(a => `Área ${a}`),
           datasets: [{
-            label: 'Custo Total',
+            label: 'Custo no Mês',
             data: valoresUltimoMes,
             backgroundColor: bgColorsMes,
             borderRadius: 6
