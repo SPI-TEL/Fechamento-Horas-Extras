@@ -11,7 +11,7 @@
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- FontAwesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <!-- PapaParse CDN -->
@@ -30,7 +30,7 @@
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col antialiased">
 
-  <!-- TELA DE LOGIN -->
+  <!-- ================= TELA DE LOGIN (PROTEÇÃO INICIAL) ================= -->
   <div id="login-screen" class="fixed inset-0 bg-[#0b2341] z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl space-y-6 relative overflow-hidden border border-slate-200">
       
@@ -45,12 +45,22 @@
       <form onsubmit="handleLogin(event)" class="space-y-4">
         <div>
           <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Usuário</label>
-          <input type="text" id="login-user" required placeholder="Digite seu usuário..." value="admin" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-800 font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none">
+          <div class="relative">
+            <i class="fa-solid fa-user absolute left-3 top-3 text-slate-400 text-xs"></i>
+            <input type="text" id="login-user" required placeholder="Digite seu usuário..." class="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-800 font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none">
+          </div>
         </div>
 
         <div>
           <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Senha</label>
-          <input type="password" id="login-pass" required placeholder="Digite sua senha..." value="admin123" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-800 font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none">
+          <div class="relative">
+            <i class="fa-solid fa-lock absolute left-3 top-3 text-slate-400 text-xs"></i>
+            <input type="password" id="login-pass" required placeholder="Digite sua senha..." class="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-800 font-medium focus:ring-2 focus:ring-sky-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div id="login-alert" class="hidden text-xs bg-rose-50 text-rose-700 border border-rose-200 p-2.5 rounded-lg text-center font-medium">
+          <i class="fa-solid fa-triangle-exclamation mr-1"></i> Usuário ou senha incorretos!
         </div>
 
         <button type="submit" id="btn-login" class="w-full py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs rounded-lg shadow-md transition flex items-center justify-center gap-2">
@@ -65,7 +75,7 @@
     </div>
   </div>
 
-  <!-- PORTAL PRINCIPAL -->
+  <!-- ================= PORTAL PRINCIPAL ================= -->
   <div id="main-portal" class="hidden min-h-screen flex-col">
     
     <!-- Topbar Header -->
@@ -99,7 +109,7 @@
               SPI
             </div>
             <div class="hidden sm:block text-left text-xs">
-              <p class="font-bold leading-tight">Supervisão SPI</p>
+              <p class="font-bold leading-tight" id="user-display-name">Supervisão SPI</p>
               <p class="text-[10px] text-slate-300">Sessão Ativa</p>
             </div>
           </div>
@@ -344,26 +354,90 @@
   </div>
 
   <script>
+    // URL DA ABA 'USUARIOS'
+    const GOOGLE_SHEETS_USUARIOS_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vShU66oSm1Q0GBrBINsiaCR64uGW_mP2MLPckpcjyZmjwDJFSaXiamg_D-mGQTlQ7WGmJjcR-CkZCD_/pub?gid=1025153891&single=true&output=csv';
+
+    // URL DA BASE 'HORAS EXTRAS'
     const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQZQ1H_MHtywA4MhrFlGkuLCL0lNQmwwjVDObrj2iryoxNlLdat0pwQFJyDDY6WImYbLDwauF_41E_k/pub?gid=135833026&single=true&output=csv';
 
+    let usuariosLive = [];
     let rawData = [];
     let filteredData = [];
     let chartInstances = {};
 
-    function handleLogin(event) {
-      event.preventDefault();
-      document.getElementById('login-screen').classList.add('hidden');
-      document.getElementById('main-portal').classList.remove('hidden');
-      document.getElementById('main-portal').classList.add('flex');
-      loadGoogleSheetData();
+    window.addEventListener('DOMContentLoaded', () => {
+      fetchUsuariosData();
+      checkExistingSession();
+    });
+
+    // 1. CARREGAR DADOS DOS USUÁRIOS
+    function fetchUsuariosData() {
+      Papa.parse(GOOGLE_SHEETS_USUARIOS_URL, {
+        download: true,
+        header: true,
+        skipEmptyLines: true,
+        complete: function(results) {
+          if (results.data && results.data.length > 0) {
+            usuariosLive = results.data.map(u => {
+              const getUVal = (keys) => {
+                for (let k of Object.keys(u)) {
+                  if (keys.some(key => k.toLowerCase().trim().includes(key.toLowerCase()))) {
+                    return u[k] ? u[k].toString().trim() : '';
+                  }
+                }
+                return '';
+              };
+              return {
+                user: getUVal(['Usuario', 'User']),
+                pass: getUVal(['Senha', 'Pass']),
+                nome: getUVal(['Nome']) || 'Usuário SPI'
+              };
+            });
+          }
+        }
+      });
+    }
+
+    // 2. VERIFICAÇÃO DE SESSÃO E LOGIN
+    function checkExistingSession() {
+      const activeUser = sessionStorage.getItem('spi_session_user');
+      if (activeUser) {
+        showPortal(activeUser);
+      }
+    }
+
+    function handleLogin(e) {
+      e.preventDefault();
+      const uInput = document.getElementById('login-user').value.trim();
+      const pInput = document.getElementById('login-pass').value.trim();
+      const alertBox = document.getElementById('login-alert');
+
+      const match = usuariosLive.find(u => u.user.toLowerCase() === uInput.toLowerCase() && u.pass === pInput);
+
+      if (match) {
+        alertBox.classList.add('hidden');
+        sessionStorage.setItem('spi_session_user', match.nome);
+        showPortal(match.nome);
+      } else {
+        alertBox.classList.remove('hidden');
+      }
     }
 
     function handleLogout() {
+      sessionStorage.removeItem('spi_session_user');
       document.getElementById('main-portal').classList.add('hidden');
-      document.getElementById('main-portal').classList.remove('flex');
       document.getElementById('login-screen').classList.remove('hidden');
     }
 
+    function showPortal(userName) {
+      document.getElementById('login-screen').classList.add('hidden');
+      document.getElementById('main-portal').classList.remove('hidden');
+      document.getElementById('main-portal').classList.add('flex');
+      document.getElementById('user-display-name').innerText = userName;
+      loadGoogleSheetData();
+    }
+
+    // 3. PROCESSAMENTO DE HORAS EXTRAS
     function timeToHours(timeStr) {
       if (!timeStr) return 0;
       let parts = timeStr.toString().trim().split(':');
@@ -387,14 +461,21 @@
     }
 
     function loadGoogleSheetData() {
-       Papa.parse(GOOGLE_SHEET_CSV_URL, {
+      const syncIcon = document.getElementById('sync-icon');
+      if (syncIcon) syncIcon.classList.add('fa-spin');
+
+      Papa.parse(GOOGLE_SHEET_CSV_URL, {
         download: true,
         header: true,
         skipEmptyLines: true,
         complete: function(results) {
+          if (syncIcon) syncIcon.classList.remove('fa-spin');
           if (results.data && results.data.length > 0) {
             processParsedData(results.data);
           }
+        },
+        error: function() {
+          if (syncIcon) syncIcon.classList.remove('fa-spin');
         }
       });
     }
@@ -555,7 +636,6 @@
       let dadosUltimoMes = filteredData.filter(d => d.mesAno === ultimoMesAno);
       let hcAtualTotal = dadosUltimoMes.reduce((acc, curr) => acc + curr.hc, 0);
 
-      // CÁLCULO PRECISO DE R$ / HC / MÊS: Média das razões (Custo_mês / HC_mês) de todos os meses selecionados
       let somaRazaoHC = 0;
       listaMesesAno.forEach(m => {
         let cMes = custoPorMes[m] || 0;
@@ -663,12 +743,18 @@
 
       let modalitiesList = ['Horas 50%', 'Horas 100%', 'Sobreaviso', 'Adic. Noturno'];
       let top1Data = [], top2Data = [], top3Data = [];
+      let top1Names = [], top2Names = [], top3Names = [];
 
       modalitiesList.forEach(m => {
         let sorted = Object.keys(modalidadeOfensores[m]).sort((a,b) => modalidadeOfensores[m][b] - modalidadeOfensores[m][a]);
         top1Data.push(sorted[0] ? modalidadeOfensores[m][sorted[0]] : 0);
+        top1Names.push(sorted[0] ? `Área ${sorted[0]}` : '--');
+
         top2Data.push(sorted[1] ? modalidadeOfensores[m][sorted[1]] : 0);
+        top2Names.push(sorted[1] ? `Área ${sorted[1]}` : '--');
+
         top3Data.push(sorted[2] ? modalidadeOfensores[m][sorted[2]] : 0);
+        top3Names.push(sorted[2] ? `Área ${sorted[2]}` : '--');
       });
 
       const ctxTop3 = document.getElementById('chartTop3Modalidades').getContext('2d');
@@ -677,12 +763,26 @@
         data: {
           labels: modalitiesList,
           datasets: [
-            { label: '1º Maior Ofensor', data: top1Data, backgroundColor: '#e11d48' },
-            { label: '2º Maior Ofensor', data: top2Data, backgroundColor: '#f97316' },
-            { label: '3º Maior Ofensor', data: top3Data, backgroundColor: '#eab308' }
+            { label: '1ª Maior Regional Ofensora', data: top1Data, backgroundColor: '#e11d48', areaNames: top1Names },
+            { label: '2ª Maior Regional Ofensora', data: top2Data, backgroundColor: '#f97316', areaNames: top2Names },
+            { label: '3ª Maior Regional Ofensora', data: top3Data, backgroundColor: '#eab308', areaNames: top3Names }
           ]
         },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } },
+            tooltip: {
+              callbacks: {
+                label: function(c) {
+                  let areaName = c.dataset.areaNames ? c.dataset.areaNames[c.dataIndex] : '';
+                  return ` ${c.dataset.label} (${areaName}): ${c.raw.toFixed(1)} Horas`;
+                }
+              }
+            }
+          }
+        }
       });
 
       let areaCustoMap = {};
